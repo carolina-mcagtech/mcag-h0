@@ -1,8 +1,8 @@
 # app/config.py
-from typing import Optional
+from typing import Annotated, Optional
 
 from pydantic import computed_field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     database_url: Optional[str] = None
     app_env: str = "development"
     secret_key: str = "change-me-in-production"
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:3000"]
 
     environment: str = "local"
     database_secret_arn: Optional[str] = None
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # cognito_pool_id, but the client id (aud for ID tokens, client_id for
     # access tokens) must be in this allowlist. Defaults to
     # [cognito_client_id] when not set.
-    cognito_allowed_client_ids: list[str] = []
+    cognito_allowed_client_ids: Annotated[list[str], NoDecode] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -55,19 +55,12 @@ class Settings(BaseSettings):
             f"/{self.cognito_pool_id}/.well-known/jwks.json"
         )
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cognito_allowed_client_ids", "cors_origins", mode="before")
     @classmethod
-    def parse_cors_origins(cls, v: object) -> list[str]:
+    def _split_csv(cls, v: object) -> object:
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v  # type: ignore[return-value]
-
-    @field_validator("cognito_allowed_client_ids", mode="before")
-    @classmethod
-    def parse_cognito_allowed_client_ids(cls, v: object) -> list[str]:
-        if isinstance(v, str):
-            return [client_id.strip() for client_id in v.split(",") if client_id.strip()]
-        return v  # type: ignore[return-value]
+            return [s.strip() for s in v.split(",") if s.strip()]
+        return v
 
     @model_validator(mode="after")
     def default_cognito_allowed_client_ids(self) -> "Settings":
