@@ -42,19 +42,28 @@ def _decode_unverified(token: str) -> dict:
 
 
 def verify_token(token: str) -> dict:
-    """Verify a JWT. Dev: decode only (no sig check). Prod: RS256 + Cognito JWKS."""
+    """Verify a JWT. Dev: decode only (no sig check). Prod: RS256 + Cognito JWKS.
+
+    Validates by issuer (our user pool) rather than a single audience, since
+    the pool has multiple legitimate app clients (web, scripts/automation).
+    The client id — `aud` for ID tokens, `client_id` for access tokens — must
+    be in `cognito_allowed_client_ids`.
+    """
     if settings.app_env != "production":
         return _decode_unverified(token)
+
+    expected_iss = f"https://cognito-idp.{settings.cognito_region}.amazonaws.com/{settings.cognito_pool_id}"
 
     try:
         header = jwt.get_unverified_header(token)
         jwks = _fetch_jwks_sync()
         public_key = _get_public_key(jwks, header["kid"])
-        return jwt.decode(
+        claims = jwt.decode(
             token,
             public_key,
             algorithms=["RS256"],
-            audience=settings.cognito_client_id,
+            issuer=expected_iss,
+            options={"verify_aud": False, "require": ["iss"]},
         )
     except HTTPException:
         raise
@@ -62,6 +71,15 @@ def verify_token(token: str) -> dict:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.PyJWTError as exc:
         raise HTTPException(status_code=401, detail="Invalid token") from exc
+
+    if claims.get("token_use") not in ("id", "access"):
+        raise HTTPException(status_code=401, detail="Invalid token_use")
+
+    client_id = claims.get("aud") or claims.get("client_id")
+    if client_id not in settings.cognito_allowed_client_ids:
+        raise HTTPException(status_code=401, detail="Token client_id not allowed")
+
+    return claims
 
 
 def extract_tenant_id(claims: dict) -> str:

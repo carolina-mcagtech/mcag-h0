@@ -1,7 +1,7 @@
 # app/config.py
 from typing import Optional
 
-from pydantic import computed_field, field_validator
+from pydantic import computed_field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     cognito_user_pool_id: str = ""
     cognito_jwks_uri: str = ""
 
+    # Multi-client pool support: token issuer is validated against
+    # cognito_pool_id, but the client id (aud for ID tokens, client_id for
+    # access tokens) must be in this allowlist. Defaults to
+    # [cognito_client_id] when not set.
+    cognito_allowed_client_ids: list[str] = []
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def jwks_url(self) -> str:
@@ -55,6 +61,19 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         return v  # type: ignore[return-value]
+
+    @field_validator("cognito_allowed_client_ids", mode="before")
+    @classmethod
+    def parse_cognito_allowed_client_ids(cls, v: object) -> list[str]:
+        if isinstance(v, str):
+            return [client_id.strip() for client_id in v.split(",") if client_id.strip()]
+        return v  # type: ignore[return-value]
+
+    @model_validator(mode="after")
+    def default_cognito_allowed_client_ids(self) -> "Settings":
+        if not self.cognito_allowed_client_ids:
+            self.cognito_allowed_client_ids = [self.cognito_client_id]
+        return self
 
 
 settings = Settings()
