@@ -15,6 +15,11 @@ class Settings(BaseSettings):
 
     environment: str = "local"
     database_secret_arn: Optional[str] = None
+    # Aurora cluster endpoint / database name to use instead of the values
+    # baked into the Secrets Manager managed-master-password secret (which
+    # may not reflect the actual cluster writer endpoint or app database).
+    db_host: Optional[str] = None
+    db_name: Optional[str] = None
     database_admin_secret_arn: str = ""
     # ADR-024 fix: dedicated secret for Alembic migrations (mcagadmin), separate
     # from the app runtime user. Falls back to database_secret_arn for local dev.

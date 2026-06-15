@@ -1,0 +1,14 @@
+# apps/api/.dockerignore
+tests/
+.venv/
+__pycache__/
+*.pyc
+*.md
+.git/
+.env
+.env.*
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+scripts/

@@ -15,17 +15,36 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
+def _build_url_from_secret(secret_arn: str) -> str:
+    """Build an asyncpg URL from a Secrets Manager DB secret.
+
+    Aurora's managed-master-password secret carries username/password/port
+    (and often host/dbname), but the cluster's actual writer endpoint and
+    app database name are supplied via DB_HOST / DB_NAME env vars and take
+    precedence when set.
+    """
+    client = boto3.client("secretsmanager", region_name="us-east-1")
+    secret = client.get_secret_value(SecretId=secret_arn)
+    data = json.loads(secret["SecretString"])
+    host = settings.db_host or data.get("host")
+    dbname = settings.db_name or data.get("dbname")
+    if not host or not dbname:
+        raise RuntimeError(
+            "DB host/dbname unresolved: set DB_HOST and DB_NAME env vars "
+            "(Aurora managed secrets do not include host/dbname)."
+        )
+    return (
+        f"postgresql+asyncpg://{data['username']}:{data['password']}"
+        f"@{host}:{data['port']}/{dbname}"
+    )
+
+
 @lru_cache(maxsize=1)
 def _get_database_url(sync: bool = False) -> str:
     if settings.database_url is not None:
         url = settings.database_url
     elif settings.database_secret_arn is not None:
-        import boto3, json
-        client = boto3.client("secretsmanager", region_name="us-east-1")
-        secret = client.get_secret_value(SecretId=settings.database_secret_arn)
-        data = json.loads(secret["SecretString"])
-        url = (f"postgresql+asyncpg://{data['username']}:{data['password']}"
-               f"@{data['host']}:{data['port']}/{data['dbname']}")
+        url = _build_url_from_secret(settings.database_secret_arn)
     else:
         raise ValueError("Neither DATABASE_URL nor DATABASE_SECRET_ARN is set")
 
@@ -46,11 +65,7 @@ def _get_migrations_database_url(sync: bool = False) -> str:
     secret_arn = settings.migrations_database_secret_arn or settings.database_secret_arn
 
     if secret_arn:
-        client = boto3.client("secretsmanager", region_name="us-east-1")
-        secret = client.get_secret_value(SecretId=secret_arn)
-        data = json.loads(secret["SecretString"])
-        url = (f"postgresql+asyncpg://{data['username']}:{data['password']}"
-               f"@{data['host']}:{data['port']}/{data['dbname']}")
+        url = _build_url_from_secret(secret_arn)
     elif settings.database_url is not None:
         url = settings.database_url
     else:
@@ -69,13 +84,7 @@ def _get_migrations_database_url(sync: bool = False) -> str:
 def _get_admin_database_url() -> str:
     """Return asyncpg URL for mcagapp_admin (BYPASSRLS). Falls back to regular URL in local dev."""
     if settings.database_admin_secret_arn:
-        client = boto3.client("secretsmanager", region_name="us-east-1")
-        secret = client.get_secret_value(SecretId=settings.database_admin_secret_arn)
-        data = json.loads(secret["SecretString"])
-        return (
-            f"postgresql+asyncpg://{data['username']}:{data['password']}"
-            f"@{data['host']}:{data['port']}/{data['dbname']}"
-        )
+        return _build_url_from_secret(settings.database_admin_secret_arn)
     # Local dev: no separate admin credentials — reuse regular URL
     return _get_database_url()
 
