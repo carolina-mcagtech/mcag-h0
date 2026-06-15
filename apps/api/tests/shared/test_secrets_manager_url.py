@@ -60,7 +60,7 @@ def test_migrations_url_uses_db_host_and_db_name_with_aurora_managed_secret():
     """Aurora managed-master-password secrets only carry username/password
     (and sometimes port) — no 'host' or 'dbname' keys. DB_HOST / DB_NAME
     must supply those, or _build_url_from_secret would KeyError."""
-    secret = {"username": "mcagadmin", "password": "s3cret", "port": 5432}
+    secret = {"username": "mcagadmin", "password": "s3cret"}
     _get_migrations_database_url.cache_clear()
     try:
         with (
@@ -76,6 +76,7 @@ def test_migrations_url_uses_db_host_and_db_name_with_aurora_managed_secret():
                 "prod-cluster.cluster-xyz.us-east-1.rds.amazonaws.com",
             ),
             patch("app.shared.db.session.settings.db_name", "mcagtech"),
+            patch("app.shared.db.session.settings.db_port", None),
         ):
             url = _get_migrations_database_url()
     finally:
@@ -89,7 +90,7 @@ def test_migrations_url_uses_db_host_and_db_name_with_aurora_managed_secret():
 
 def test_admin_url_uses_db_host_and_db_name_with_aurora_managed_secret():
     """Same Aurora managed-secret shape (no host/dbname) for mcagapp_admin."""
-    secret = {"username": "mcagapp_admin", "password": "s3cret", "port": 5432}
+    secret = {"username": "mcagapp_admin", "password": "s3cret"}
     _get_admin_database_url.cache_clear()
     try:
         with (
@@ -103,6 +104,7 @@ def test_admin_url_uses_db_host_and_db_name_with_aurora_managed_secret():
                 "prod-cluster.cluster-xyz.us-east-1.rds.amazonaws.com",
             ),
             patch("app.shared.db.session.settings.db_name", "mcagtech"),
+            patch("app.shared.db.session.settings.db_port", None),
         ):
             url = _get_admin_database_url()
     finally:

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     # may not reflect the actual cluster writer endpoint or app database).
     db_host: Optional[str] = None
     db_name: Optional[str] = None
+    db_port: Optional[int] = None
     database_admin_secret_arn: str = ""
     # ADR-024 fix: dedicated secret for Alembic migrations (mcagadmin), separate
     # from the app runtime user. Falls back to database_secret_arn for local dev.

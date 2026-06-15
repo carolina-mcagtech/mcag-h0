@@ -28,6 +28,7 @@ def _build_url_from_secret(secret_arn: str) -> str:
     data = json.loads(secret["SecretString"])
     host = settings.db_host or data.get("host")
     dbname = settings.db_name or data.get("dbname")
+    port = settings.db_port or data.get("port") or 5432
     if not host or not dbname:
         raise RuntimeError(
             "DB host/dbname unresolved: set DB_HOST and DB_NAME env vars "
@@ -35,7 +36,7 @@ def _build_url_from_secret(secret_arn: str) -> str:
         )
     return (
         f"postgresql+asyncpg://{data['username']}:{data['password']}"
-        f"@{host}:{data['port']}/{dbname}"
+        f"@{host}:{port}/{dbname}"
     )
 
 
