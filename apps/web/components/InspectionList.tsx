@@ -2,7 +2,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { tenantHeaders } from '@/lib/api'
 
 type InspectionStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 type InspectionType =
@@ -79,11 +78,11 @@ export default function InspectionList() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/inspections', { cache: 'no-store', headers: tenantHeaders }).then((r) => {
+      fetch('/api/inspections', { cache: 'no-store' }).then((r) => {
         if (!r.ok) throw new Error('inspections failed')
         return r.json() as Promise<Inspection[]>
       }),
-      fetch('/api/properties', { cache: 'no-store', headers: tenantHeaders }).then((r) => {
+      fetch('/api/properties', { cache: 'no-store' }).then((r) => {
         if (!r.ok) throw new Error('properties failed')
         return r.json() as Promise<Property[]>
       }),

@@ -2,7 +2,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { tenantHeaders } from '@/lib/api'
 
 type Property = { id: string }
 
@@ -11,7 +10,7 @@ export default function PropertyCount() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    fetch('/api/properties', { cache: 'no-store', headers: tenantHeaders })
+    fetch('/api/properties', { cache: 'no-store' })
       .then((res) => {
         if (!res.ok) throw new Error('failed')
         return res.json() as Promise<Property[]>

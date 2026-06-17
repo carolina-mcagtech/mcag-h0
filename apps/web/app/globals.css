@@ -3,6 +3,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* shadcn/ui CSS variables — Tailwind v3 HSL channel format */
+:root {
+  --background: 210 17% 98%;
+  --foreground: 221 25% 20%;
+  --card: 0 0% 100%;
+  --card-foreground: 221 25% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 221 25% 20%;
+  --primary: 221 40% 42%;
+  --primary-foreground: 210 17% 98%;
+  --secondary: 213 20% 94%;
+  --secondary-foreground: 221 20% 30%;
+  --muted: 213 20% 94%;
+  --muted-foreground: 220 10% 46%;
+  --accent: 213 25% 91%;
+  --accent-foreground: 221 20% 30%;
+  --destructive: 10 60% 50%;
+  --destructive-foreground: 210 17% 98%;
+  --border: 215 20% 88%;
+  --input: 215 20% 88%;
+  --ring: 221 40% 42%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 20% 10%;
+  --foreground: 210 17% 98%;
+  --card: 222 20% 14%;
+  --card-foreground: 210 17% 98%;
+  --popover: 222 20% 14%;
+  --popover-foreground: 210 17% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 20% 10%;
+  --secondary: 217 25% 20%;
+  --secondary-foreground: 210 17% 98%;
+  --muted: 217 25% 20%;
+  --muted-foreground: 215 15% 60%;
+  --accent: 217 25% 20%;
+  --accent-foreground: 210 17% 98%;
+  --destructive: 0 63% 45%;
+  --destructive-foreground: 210 17% 98%;
+  --border: 217 25% 20%;
+  --input: 217 25% 20%;
+  --ring: 221 40% 60%;
+}
+
 @layer components {
   .dashboard-table {
     @apply w-full border-collapse text-left;
