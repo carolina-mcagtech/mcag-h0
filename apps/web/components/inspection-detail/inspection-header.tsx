@@ -8,21 +8,25 @@ import {
   INSPECTION_STATUS_META,
   type InspectionStatus,
 } from "@/lib/inspection-detail"
+import type { SaveStatus } from "@/hooks/use-inspection-detail"
 
 export function InspectionHeader({
   address,
   status,
   isDirty,
+  saveStatus,
   onSave,
   onEditFindings,
 }: {
   address: string
   status: InspectionStatus
   isDirty: boolean
+  saveStatus: SaveStatus
   onSave: () => void
   onEditFindings: () => void
 }) {
   const statusMeta = INSPECTION_STATUS_META[status]
+  const isSaving = saveStatus === "saving"
 
   return (
     <header className="flex flex-col gap-4 border-b border-border pb-6">
@@ -46,19 +50,26 @@ export function InspectionHeader({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" onClick={onEditFindings}>
+          <Button variant="outline" onClick={onEditFindings} disabled={isSaving}>
             <FileEditIcon data-icon="inline-start" />
             Edit Findings
           </Button>
-          <Button onClick={onSave} disabled={!isDirty}>
+          <Button onClick={onSave} disabled={!isDirty || isSaving}>
             <SaveIcon data-icon="inline-start" />
-            Save Changes
+            {isSaving ? "Saving…" : "Save Changes"}
           </Button>
         </div>
       </div>
 
       <div className="flex items-center gap-1.5 text-sm">
-        {isDirty ? (
+        {isSaving ? (
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="size-2 animate-pulse rounded-full bg-primary" />
+            Saving…
+          </span>
+        ) : saveStatus === "error" ? (
+          <span className="text-destructive">Save failed — retry</span>
+        ) : isDirty ? (
           <span className="flex items-center gap-1.5 text-amber-700">
             <span className="size-2 rounded-full bg-amber-500" />
             Unsaved changes

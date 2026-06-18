@@ -42,13 +42,12 @@ export function InspectionDetail({
   findings: FindingsSummaryData
 }) {
   const router = useRouter()
-  const { data, setField, isDirty, commit, getPayload } =
+  const { data, setField, isDirty, saveStatus, save } =
     useInspectionDetail(inspection)
 
-  function handleSave() {
-    // Wire to PUT /inspections/{id} in Phase 3.
-    console.log("[detail] Saving inspection payload:", getPayload())
-    commit()
+  async function handleSave() {
+    const result = await save()
+    if (result.status === 401) router.push("/login")
   }
 
   function handleEditFindings() {
@@ -61,6 +60,7 @@ export function InspectionDetail({
         address={data.property_address}
         status={data.status}
         isDirty={isDirty}
+        saveStatus={saveStatus}
         onSave={handleSave}
         onEditFindings={handleEditFindings}
       />
