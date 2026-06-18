@@ -1,12 +1,14 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import type { InspectionDetailData } from "@/lib/inspection-detail"
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error"
 
-// All editable fields sent to PUT /api/inspections/{id}.
-// id, status, tenant_id, and inspector_id are read-only from this form.
+const DEBOUNCE_MS = 800
+const SAVED_RESET_MS = 2500
+
 function buildPutBody(d: InspectionDetailData) {
   return {
     scheduled_at: d.scheduled_at,
@@ -47,65 +49,89 @@ function buildPutBody(d: InspectionDetailData) {
   }
 }
 
-/**
- * Holds the entire inspection detail form in a single object.
- * Initial data comes from the server GET; save() sends PUT via the route handler.
- */
+// Strip timezone suffix from an ISO timestamp so datetime-local inputs are happy.
+// "2026-06-20T08:00:00Z" → "2026-06-20T08:00"
+function normalizeInitial(d: InspectionDetailData): InspectionDetailData {
+  return {
+    ...d,
+    scheduled_at: d.scheduled_at
+      ? d.scheduled_at.replace(/:\d{2}(\.\d+)?Z?$/, "").slice(0, 16)
+      : null,
+  }
+}
+
 export function useInspectionDetail(initial: InspectionDetailData) {
-  const [initialData, setInitialData] = useState<InspectionDetailData>(initial)
-  const [data, setData] = useState<InspectionDetailData>(initial)
+  const router = useRouter()
+  const normalized = normalizeInitial(initial)
+  const [data, setData] = useState<InspectionDetailData>(normalized)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+
+  // Always-current refs so the debounce callback never closes over stale values.
+  const dataRef = useRef<InspectionDetailData>(normalized)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Ref to the latest autosave closure — same pattern as persistFindingRef in use-findings.ts.
+  const autosaveRef = useRef<() => Promise<void>>(async () => {})
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+    }
+  }, [])
+
+  const autosave = useCallback(async () => {
+    const snapshot = dataRef.current
+    setSaveStatus("saving")
+    try {
+      const res = await fetch(`/api/inspections/${snapshot.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPutBody(snapshot)),
+      })
+      if (res.status === 401) {
+        router.push("/login")
+        return
+      }
+      if (res.ok) {
+        setSaveStatus("saved")
+        if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+        savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), SAVED_RESET_MS)
+      } else {
+        setSaveStatus("error")
+      }
+    } catch {
+      setSaveStatus("error")
+    }
+  }, [router])
+
+  // Keep the ref pointing at the latest closure so the timer always calls
+  // the freshest autosave regardless of when useCallback was last re-created.
+  autosaveRef.current = autosave
+
+  // Empty deps — scheduleAutosave is truly stable and reads data via dataRef,
+  // autosave via autosaveRef. No closure over potentially-stale values.
+  const scheduleAutosave = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null
+      autosaveRef.current()
+    }, DEBOUNCE_MS)
+  }, [])
 
   const setField = useCallback(
     <K extends keyof InspectionDetailData>(key: K, value: InspectionDetailData[K]) => {
-      setData((prev) => ({ ...prev, [key]: value }))
-      // Clear error/saved indicator as soon as the user makes a new edit.
-      setSaveStatus((s) => (s === "saving" ? s : "idle"))
-    },
-    [],
-  )
-
-  const isDirty = useMemo(
-    () => JSON.stringify(data) !== JSON.stringify(initialData),
-    [data, initialData],
-  )
-
-  const reset = useCallback(() => {
-    setData(initialData)
-  }, [initialData])
-
-  /** Advance the baseline without a network call (used externally if needed). */
-  const commit = useCallback(() => {
-    setInitialData(data)
-  }, [data])
-
-  /**
-   * PUT /api/inspections/{id} via the Next.js route handler (which injects the
-   * httpOnly cookie server-side). Returns { ok, status } so the caller can handle 401.
-   */
-  const save = useCallback(async (): Promise<{ ok: boolean; status: number }> => {
-    setSaveStatus("saving")
-    try {
-      const res = await fetch(`/api/inspections/${data.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildPutBody(data)),
+      setData((prev) => {
+        const next = { ...prev, [key]: value }
+        dataRef.current = next
+        return next
       })
-      if (res.ok) {
-        setInitialData(data) // saved values become the new dirty baseline
-        setSaveStatus("saved")
-        return { ok: true, status: res.status }
-      }
-      // Don't leave the button in "saving" state on 401 — caller will redirect.
-      setSaveStatus(res.status === 401 ? "idle" : "error")
-      return { ok: false, status: res.status }
-    } catch {
-      setSaveStatus("error")
-      return { ok: false, status: 0 }
-    }
-  }, [data])
+      scheduleAutosave()
+    },
+    [scheduleAutosave],
+  )
 
-  return { data, setField, isDirty, saveStatus, reset, commit, save }
+  return { data, setField, saveStatus }
 }
 
 export type InspectionDetailFormApi = ReturnType<typeof useInspectionDetail>

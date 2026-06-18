@@ -1,7 +1,11 @@
 import { ClipboardList, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-export function InspectionsEmptyState() {
+export function InspectionsEmptyState({
+  onNewInspection,
+}: {
+  onNewInspection?: () => void
+}) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-border bg-card px-6 py-20 text-center">
       <div className="flex size-14 items-center justify-center rounded-full bg-secondary text-primary">
@@ -16,7 +20,7 @@ export function InspectionsEmptyState() {
           started by creating a new inspection.
         </p>
       </div>
-      <Button>
+      <Button onClick={onNewInspection}>
         <Plus className="size-4" aria-hidden="true" />
         New Inspection
       </Button>

@@ -22,7 +22,6 @@ export function FindingsEntry({ initialFindings, inspection }: FindingsEntryProp
     updateFinding,
     removeFinding,
     retryFinding,
-    flushAll,
   } = useFindings(initialFindings, inspection)
 
   const [activeSection, setActiveSection] = useState<Section>("ROOF")
@@ -32,7 +31,6 @@ export function FindingsEntry({ initialFindings, inspection }: FindingsEntryProp
       <PageHeader
         inspection={inspection}
         globalSaveStatus={globalSaveStatus}
-        onFlush={flushAll}
       />
 
       <div className="flex min-h-0 flex-1">

@@ -7,17 +7,36 @@ export type InspectionStatus =
   | "DELIVERED"
 
 // Matches the real InspectionTypeEnum from the API.
-export type InspectionType =
-  | "FULL_INSPECTION"
-  | "WIND_MITIGATION"
-  | "FOUR_POINT"
-  | "MOLD_INSPECTION"
-  | "TERMITES"
-  | "ROOF_CERTIFICATION"
-  | "OPENING_PROTECTION"
-  | "SEWER_INSPECTION"
-  | "LEAD_PAINT_INSPECTION"
-  | "WATER_QUALITY_TEST"
+export const INSPECTION_TYPES = [
+  { value: "FULL_INSPECTION", label: "Full Inspection" },
+  { value: "WIND_MITIGATION", label: "Wind Mitigation" },
+  { value: "FOUR_POINT", label: "4-Point" },
+  { value: "MOLD_INSPECTION", label: "Mold Inspection" },
+  { value: "TERMITES", label: "Termites" },
+  { value: "ROOF_CERTIFICATION", label: "Roof Certification" },
+  { value: "OPENING_PROTECTION", label: "Opening Protection" },
+  { value: "SEWER_INSPECTION", label: "Sewer Inspection" },
+  { value: "LEAD_PAINT_INSPECTION", label: "Lead Paint Inspection" },
+  { value: "WATER_QUALITY_TEST", label: "Water Quality Test" },
+] as const
+
+export type InspectionType = (typeof INSPECTION_TYPES)[number]["value"]
+
+export const PAYMENT_TIMINGS = [
+  { value: "AT_PROPERTY", label: "At Property" },
+  { value: "AT_DELIVERY", label: "At Delivery" },
+  { value: "AFTER_DELIVERY", label: "After Delivery" },
+] as const
+
+export type PaymentTiming = (typeof PAYMENT_TIMINGS)[number]["value"]
+
+export interface NewInspectionPayload {
+  propertyAddress: string
+  scheduledAt: string
+  inspectionTypes: InspectionType[]
+  totalFee: number
+  paymentTiming: PaymentTiming
+}
 
 export interface Inspection {
   id: string

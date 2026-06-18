@@ -42,27 +42,16 @@ export function InspectionDetail({
   findings: FindingsSummaryData
 }) {
   const router = useRouter()
-  const { data, setField, isDirty, saveStatus, save } =
-    useInspectionDetail(inspection)
-
-  async function handleSave() {
-    const result = await save()
-    if (result.status === 401) router.push("/login")
-  }
-
-  function handleEditFindings() {
-    router.push(`/inspections/${data.id}/findings`)
-  }
+  const { data, setField, saveStatus } = useInspectionDetail(inspection)
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 md:px-6">
       <InspectionHeader
         address={data.property_address}
         status={data.status}
-        isDirty={isDirty}
         saveStatus={saveStatus}
-        onSave={handleSave}
-        onEditFindings={handleEditFindings}
+        onBack={() => router.push("/inspections")}
+        onEditFindings={() => router.push(`/inspections/${data.id}/findings`)}
       />
 
       <FindingsSummary data={findings} />

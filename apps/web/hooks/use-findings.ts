@@ -45,7 +45,7 @@ function buildUpdateBody(f: Finding): UpdateBody {
 // Hook
 // ------------------------------------------------------------
 
-export type GlobalSaveStatus = "saving" | "pending" | "error" | "all-saved"
+export type GlobalSaveStatus = "idle" | "saving" | "pending" | "error" | "all-saved"
 
 export function useFindings(initialFindings: Finding[], inspection: InspectionMeta) {
   const router = useRouter()
@@ -57,6 +57,11 @@ export function useFindings(initialFindings: Finding[], inspection: InspectionMe
 
   // ref to break circular dep between scheduleSave ↔ persistFinding
   const persistFindingRef = useRef<((f: Finding) => Promise<void>) | null>(null)
+
+  // True after the first successful network save. Drives "All changes saved"
+  // visibility. Using state (not ref) so resetting it triggers a re-render
+  // and globalSaveStatus falls back to "idle".
+  const [hasSavedOnce, setHasSavedOnce] = useState(false)
 
   // setFindings wrapper that keeps the ref in sync synchronously
   const setFindings = useCallback((updater: (prev: Finding[]) => Finding[]) => {
@@ -150,6 +155,7 @@ export function useFindings(initialFindings: Finding[], inspection: InspectionMe
         // Compare current state vs what we sent. If the finding was edited
         // while the request was in flight, saveStatus will be "draft" and we
         // keep it that way so a follow-up save fires.
+        setHasSavedOnce(true)
         setFindings((prev) =>
           prev.map((f) => {
             if (f.id !== idKey) return f
@@ -287,8 +293,16 @@ export function useFindings(initialFindings: Finding[], inspection: InspectionMe
     if (findings.some((f) => f.saveStatus === "saving")) return "saving"
     if (findings.some((f) => f.saveStatus === "error")) return "error"
     if (findings.some((f) => f.saveStatus === "draft" && isFindingValid(f))) return "pending"
+    if (!hasSavedOnce) return "idle"
     return "all-saved"
-  }, [findings])
+  }, [findings, hasSavedOnce])
+
+  // Reset "All changes saved" to idle after 2.5 s — same UX as inspection-detail.
+  useEffect(() => {
+    if (globalSaveStatus !== "all-saved") return
+    const timer = setTimeout(() => setHasSavedOnce(false), 2500)
+    return () => clearTimeout(timer)
+  }, [globalSaveStatus])
 
   return {
     inspection,

@@ -177,14 +177,25 @@ export function SwitchField({
   onChange: (v: boolean) => void
 }) {
   return (
-    <Field orientation="horizontal" className="rounded-lg border p-3.5">
+    <Field
+      orientation="horizontal"
+      className="cursor-pointer rounded-lg border p-3.5"
+      onClickCapture={(e) => {
+        // Capture phase intercept: stop propagation so the click never reaches
+        // Base UI Switch internals. If it did, Base UI would dispatch a
+        // synthetic click to the hidden checkbox which bubbles back up here,
+        // causing a double-call that cancels the toggle.
+        e.stopPropagation()
+        onChange(!checked)
+      }}
+    >
       <FieldContent>
         <FieldLabel className="font-medium">{label}</FieldLabel>
         {description ? (
           <p className="text-sm text-muted-foreground">{description}</p>
         ) : null}
       </FieldContent>
-      <Switch checked={checked} onCheckedChange={onChange} />
+      <Switch checked={checked} />
     </Field>
   )
 }
