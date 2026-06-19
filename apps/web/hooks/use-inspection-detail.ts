@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import type { InspectionDetailData } from "@/lib/inspection-detail"
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error"
+export type TransitionStatus = "idle" | "loading" | "error"
 
 const DEBOUNCE_MS = 800
 const SAVED_RESET_MS = 2500
@@ -65,6 +66,9 @@ export function useInspectionDetail(initial: InspectionDetailData) {
   const normalized = normalizeInitial(initial)
   const [data, setData] = useState<InspectionDetailData>(normalized)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
+  const [transitionStatus, setTransitionStatus] = useState<TransitionStatus>("idle")
+  const [transitionError, setTransitionError] = useState<string | null>(null)
+  const transitionErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Always-current refs so the debounce callback never closes over stale values.
   const dataRef = useRef<InspectionDetailData>(normalized)
@@ -77,6 +81,7 @@ export function useInspectionDetail(initial: InspectionDetailData) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+      if (transitionErrorTimerRef.current) clearTimeout(transitionErrorTimerRef.current)
     }
   }, [])
 
@@ -131,7 +136,51 @@ export function useInspectionDetail(initial: InspectionDetailData) {
     [scheduleAutosave],
   )
 
-  return { data, setField, saveStatus }
+  const transition = useCallback(
+    async (nextStatus: string) => {
+      setTransitionStatus("loading")
+      setTransitionError(null)
+      try {
+        const res = await fetch(`/api/inspections/${dataRef.current.id}/transition`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus }),
+        })
+        if (res.status === 401) {
+          router.push("/login")
+          return
+        }
+        if (res.ok) {
+          const updated = await res.json()
+          setData((prev) => ({ ...prev, status: updated.status }))
+          dataRef.current = { ...dataRef.current, status: updated.status }
+          setTransitionStatus("idle")
+        } else {
+          const body = await res.json().catch(() => null)
+          const detail =
+            body?.detail ?? body?.error ?? "Invalid transition"
+          setTransitionError(typeof detail === "string" ? detail : JSON.stringify(detail))
+          setTransitionStatus("error")
+          if (transitionErrorTimerRef.current) clearTimeout(transitionErrorTimerRef.current)
+          transitionErrorTimerRef.current = setTimeout(() => {
+            setTransitionStatus("idle")
+            setTransitionError(null)
+          }, 3000)
+        }
+      } catch {
+        setTransitionError("Network error")
+        setTransitionStatus("error")
+        if (transitionErrorTimerRef.current) clearTimeout(transitionErrorTimerRef.current)
+        transitionErrorTimerRef.current = setTimeout(() => {
+          setTransitionStatus("idle")
+          setTransitionError(null)
+        }, 3000)
+      }
+    },
+    [router],
+  )
+
+  return { data, setField, saveStatus, transition, transitionStatus, transitionError }
 }
 
 export type InspectionDetailFormApi = ReturnType<typeof useInspectionDetail>

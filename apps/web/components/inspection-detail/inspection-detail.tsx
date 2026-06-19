@@ -42,7 +42,7 @@ export function InspectionDetail({
   findings: FindingsSummaryData
 }) {
   const router = useRouter()
-  const { data, setField, saveStatus } = useInspectionDetail(inspection)
+  const { data, setField, saveStatus, transition, transitionStatus, transitionError } = useInspectionDetail(inspection)
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -50,8 +50,11 @@ export function InspectionDetail({
         address={data.property_address}
         status={data.status}
         saveStatus={saveStatus}
+        transitionStatus={transitionStatus}
+        transitionError={transitionError}
         onBack={() => router.push("/inspections")}
         onEditFindings={() => router.push(`/inspections/${data.id}/findings`)}
+        onTransition={transition}
       />
 
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 md:px-6">

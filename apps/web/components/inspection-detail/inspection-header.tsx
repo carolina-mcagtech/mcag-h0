@@ -8,22 +8,54 @@ import {
   INSPECTION_STATUS_META,
   type InspectionStatus,
 } from "@/lib/inspection-detail"
-import type { SaveStatus } from "@/hooks/use-inspection-detail"
+import type { SaveStatus, TransitionStatus } from "@/hooks/use-inspection-detail"
+
+const TRANSITION_CONFIG: Partial<
+  Record<InspectionStatus, { label: string; next: string; className: string }>
+> = {
+  DRAFT: {
+    label: "Start Inspection",
+    next: "IN_FIELD",
+    className: "",
+  },
+  IN_FIELD: {
+    label: "Submit for Review",
+    next: "PENDING_REVIEW",
+    className: "",
+  },
+  PENDING_REVIEW: {
+    label: "Publish Report",
+    next: "PUBLISHED",
+    className: "bg-green-600 text-white hover:bg-green-700 border-green-600",
+  },
+  PUBLISHED: {
+    label: "Mark Delivered",
+    next: "DELIVERED",
+    className: "bg-teal-600 text-white hover:bg-teal-700 border-teal-600",
+  },
+}
 
 export function InspectionHeader({
   address,
   status,
   saveStatus,
+  transitionStatus,
+  transitionError,
   onBack,
   onEditFindings,
+  onTransition,
 }: {
   address: string
   status: InspectionStatus
   saveStatus: SaveStatus
+  transitionStatus: TransitionStatus
+  transitionError: string | null
   onBack: () => void
   onEditFindings: () => void
+  onTransition: (nextStatus: string) => void
 }) {
   const statusMeta = INSPECTION_STATUS_META[status]
+  const txConfig = TRANSITION_CONFIG[status]
 
   return (
     <header className="border-b border-border bg-card">
@@ -63,10 +95,27 @@ export function InspectionHeader({
           )}
         </div>
 
-        <Button size="sm" variant="outline" onClick={onEditFindings} className="shrink-0">
-          <FileEditIcon data-icon="inline-start" />
-          Edit Findings
-        </Button>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <div className="flex items-center gap-2">
+            {txConfig && (
+              <Button
+                size="sm"
+                disabled={transitionStatus === "loading"}
+                onClick={() => onTransition(txConfig.next)}
+                className={txConfig.className}
+              >
+                {transitionStatus === "loading" ? "Updating…" : txConfig.label}
+              </Button>
+            )}
+            <Button size="sm" variant="outline" onClick={onEditFindings}>
+              <FileEditIcon data-icon="inline-start" />
+              Edit Findings
+            </Button>
+          </div>
+          {transitionStatus === "error" && transitionError && (
+            <p className="text-xs text-destructive">{transitionError}</p>
+          )}
+        </div>
       </div>
     </header>
   )
