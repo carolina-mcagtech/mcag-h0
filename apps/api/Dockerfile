@@ -6,6 +6,12 @@ FROM python:3.12-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-xlib-2.0-0 \
+    libffi-dev \
+    shared-mime-info \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -18,6 +24,12 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-xlib-2.0-0 \
+    shared-mime-info \
+    fonts-liberation \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local

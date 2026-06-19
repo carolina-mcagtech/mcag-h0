@@ -25,6 +25,9 @@ const FONT_OPTIONS = [
 export function SettingsForm({ initialTheme }: { initialTheme: ThemeConfig }) {
   const [inspectorName, setInspectorName] = useState(initialTheme.inspector_name ?? "")
   const [licenseNumber, setLicenseNumber] = useState(initialTheme.license_number ?? "")
+  const [email, setEmail] = useState(initialTheme.email ?? "")
+  const [moldLicense, setMoldLicense] = useState(initialTheme.mold_license ?? "")
+  const [nachiLicense, setNachiLicense] = useState(initialTheme.nachi_license ?? "")
   const [phone, setPhone] = useState(initialTheme.phone ?? "")
   const [website, setWebsite] = useState(initialTheme.website ?? "")
   const [brandName, setBrandName] = useState(initialTheme.brand_name ?? "")
@@ -45,6 +48,9 @@ export function SettingsForm({ initialTheme }: { initialTheme: ThemeConfig }) {
           theme_config: {
             inspector_name: inspectorName || null,
             license_number: licenseNumber || null,
+            email: email || null,
+            mold_license: moldLicense || null,
+            nachi_license: nachiLicense || null,
             phone: phone || null,
             website: website || null,
             brand_name: brandName || null,
@@ -95,6 +101,39 @@ export function SettingsForm({ initialTheme }: { initialTheme: ThemeConfig }) {
               value={licenseNumber}
               onChange={(e) => setLicenseNumber(e.target.value)}
               placeholder="HI-XXXXX"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="inspector@email.com"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="mold-license">Mold Inspector License</Label>
+            <Input
+              id="mold-license"
+              type="text"
+              value={moldLicense}
+              onChange={(e) => setMoldLicense(e.target.value)}
+              placeholder="MRSA-XXXX"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="nachi-license">NACHI License</Label>
+            <Input
+              id="nachi-license"
+              type="text"
+              value={nachiLicense}
+              onChange={(e) => setNachiLicense(e.target.value)}
+              placeholder="0511XXXX"
             />
           </div>
 

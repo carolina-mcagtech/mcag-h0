@@ -28,6 +28,9 @@ class ThemeConfig(BaseModel):
     phone: str | None = None
     website: str | None = None
     font_family: str | None = None
+    email: str | None = None
+    mold_license: str | None = None
+    nachi_license: str | None = None
 
 
 class TenantCreate(BaseModel):

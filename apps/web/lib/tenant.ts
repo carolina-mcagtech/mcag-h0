@@ -9,6 +9,9 @@ export interface ThemeConfig {
   phone: string | null
   website: string | null
   font_family: string | null
+  email: string | null
+  mold_license: string | null
+  nachi_license: string | null
 }
 
 export interface TenantResponse {

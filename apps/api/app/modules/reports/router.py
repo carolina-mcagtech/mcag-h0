@@ -2,12 +2,14 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi.responses import Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.modules.inspections.service import get_inspection
 from app.modules.reports import service
+from app.modules.reports.pdf_generator import generate_full_inspection_pdf
 from app.modules.reports.schemas import (
     ReportJobCreate,
     ReportJobResponse,
@@ -23,6 +25,25 @@ async def _ensure_inspection(inspection_id: uuid.UUID, session: AsyncSession) ->
     inspection = await get_inspection(inspection_id, session)
     if inspection is None:
         raise HTTPException(status_code=404, detail="inspection not found")
+
+
+@router.get("/download", response_class=Response)
+async def download_report_pdf(
+    inspection_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    """Generate and stream the Full Inspection PDF."""
+    await _ensure_inspection(inspection_id, session)
+    try:
+        pdf_bytes = await generate_full_inspection_pdf(inspection_id, session)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {exc}")
+    filename = f"inspection-report-{str(inspection_id)[:8]}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.post("", response_model=ReportJobResponse, status_code=201)

@@ -11,7 +11,7 @@ export async function GET(
   const token = cookies().get("id_token")?.value
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const res = await fetch(`${API_BASE}/inspections/${params.id}/reports/pdf`, {
+  const res = await fetch(`${API_BASE}/inspections/${params.id}/reports/download`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
