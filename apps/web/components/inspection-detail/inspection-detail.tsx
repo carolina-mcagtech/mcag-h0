@@ -49,6 +49,7 @@ export function InspectionDetail({
       <InspectionHeader
         address={data.property_address}
         status={data.status}
+        inspectionId={data.id}
         saveStatus={saveStatus}
         transitionStatus={transitionStatus}
         transitionError={transitionError}

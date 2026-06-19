@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeftIcon, CheckIcon, FileEditIcon, MapPinIcon } from "lucide-react"
+import { ArrowLeftIcon, CheckIcon, DownloadIcon, FileEditIcon, MapPinIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -38,6 +38,7 @@ const TRANSITION_CONFIG: Partial<
 export function InspectionHeader({
   address,
   status,
+  inspectionId,
   saveStatus,
   transitionStatus,
   transitionError,
@@ -47,6 +48,7 @@ export function InspectionHeader({
 }: {
   address: string
   status: InspectionStatus
+  inspectionId: string
   saveStatus: SaveStatus
   transitionStatus: TransitionStatus
   transitionError: string | null
@@ -110,6 +112,12 @@ export function InspectionHeader({
             <Button size="sm" variant="outline" onClick={onEditFindings}>
               <FileEditIcon data-icon="inline-start" />
               Edit Findings
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a href={`/api/inspections/${inspectionId}/report`} download>
+                <DownloadIcon data-icon="inline-start" />
+                Download Report
+              </a>
             </Button>
           </div>
           {transitionStatus === "error" && transitionError && (
