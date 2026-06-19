@@ -45,7 +45,7 @@ export function InspectionDetail({
   const { data, setField, saveStatus } = useInspectionDetail(inspection)
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex min-h-screen flex-col bg-background">
       <InspectionHeader
         address={data.property_address}
         status={data.status}
@@ -54,6 +54,7 @@ export function InspectionDetail({
         onEditFindings={() => router.push(`/inspections/${data.id}/findings`)}
       />
 
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 md:px-6">
       <FindingsSummary data={findings} />
 
       <div className="flex flex-col gap-6">
@@ -63,6 +64,14 @@ export function InspectionDetail({
           title="Schedule & Basics"
           description="Appointment, services, and payment."
         >
+          <div className="sm:col-span-2">
+            <TextField
+              label="Property Address"
+              value={data.property_address}
+              onChange={(v) => setField("property_address", v ?? "")}
+              placeholder="123 Main St, Miami, FL 33101"
+            />
+          </div>
           <TextField
             label="Scheduled At"
             type="datetime-local"
@@ -324,5 +333,6 @@ export function InspectionDetail({
         </SectionCard>
       </div>
     </main>
+    </div>
   )
 }

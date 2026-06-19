@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, ClipboardList } from "lucide-react"
+import { ArrowLeftIcon, Plus, ClipboardList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FindingRow } from "@/components/findings/finding-row"
 import {
@@ -19,6 +19,7 @@ interface SectionPanelProps {
   onUpdate: (id: string, patch: Omit<Partial<Finding>, "saveStatus" | "id">) => void
   onRemove: (id: string) => void
   onRetry: (id: string) => void
+  onMobileBack: () => void
 }
 
 const RULE_BADGE: Record<string, { label: string; className: string }> = {
@@ -43,6 +44,7 @@ export function SectionPanel({
   onUpdate,
   onRemove,
   onRetry,
+  onMobileBack,
 }: SectionPanelProps) {
   const config = SECTION_CONFIG[section]
   const rule = RULE_BADGE[config.conditionRule]
@@ -50,6 +52,15 @@ export function SectionPanel({
   return (
     <section className="flex h-full flex-col" aria-label={`${SECTION_LABELS[section]} findings`}>
       <header className="border-b border-border px-6 py-5">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onMobileBack}
+          className="md:hidden -ml-2 mb-3"
+        >
+          <ArrowLeftIcon data-icon="inline-start" />
+          Sections
+        </Button>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
