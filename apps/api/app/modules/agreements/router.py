@@ -2,10 +2,12 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.agreements import service
+from app.modules.agreements.agreement_generator import generate_agreement_pdf
 from app.modules.agreements.schemas import (
     AgreementCreate,
     AgreementResponse,
@@ -49,6 +51,21 @@ async def list_agreements(
     await _ensure_inspection(inspection_id, session)
     agreements = await service.list_agreements_by_inspection(inspection_id, session)
     return [AgreementResponse.model_validate(a) for a in agreements]
+
+
+@router.get("/pdf", response_class=Response)
+async def download_agreement_pdf(
+    inspection_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    await _ensure_inspection(inspection_id, session)
+    pdf_bytes = await generate_agreement_pdf(inspection_id, session)
+    filename = f"inspection-agreement-{str(inspection_id)[:8]}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.get("/{agreement_id}", response_model=AgreementResponse)
