@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeftIcon, CheckIcon, DownloadIcon, FileEditIcon, MapPinIcon } from "lucide-react"
+import { ArrowLeftIcon, CheckIcon, DownloadIcon, FileEditIcon, FileTextIcon, MapPinIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -112,6 +112,12 @@ export function InspectionHeader({
             <Button size="sm" variant="outline" onClick={onEditFindings}>
               <FileEditIcon data-icon="inline-start" />
               Edit Findings
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a href={`/api/inspections/${inspectionId}/agreement`} download="inspection-agreement.pdf">
+                <FileTextIcon data-icon="inline-start" />
+                Send Agreement
+              </a>
             </Button>
             <Button size="sm" variant="outline" asChild>
               <a href={`/api/inspections/${inspectionId}/report`} download>
