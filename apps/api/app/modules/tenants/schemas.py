@@ -23,6 +23,11 @@ class ThemeConfig(BaseModel):
     primary_color: str | None = None
     logo_url: str | None = None
     brand_name: str | None = None
+    license_number: str | None = None
+    inspector_name: str | None = None
+    phone: str | None = None
+    website: str | None = None
+    font_family: str | None = None
 
 
 class TenantCreate(BaseModel):

@@ -4,6 +4,11 @@ export interface ThemeConfig {
   primary_color: string | null
   logo_url: string | null
   brand_name: string | null
+  license_number: string | null
+  inspector_name: string | null
+  phone: string | null
+  website: string | null
+  font_family: string | null
 }
 
 export interface TenantResponse {

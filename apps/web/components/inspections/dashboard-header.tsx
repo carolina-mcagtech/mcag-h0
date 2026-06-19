@@ -13,7 +13,13 @@ import {
 import { type TenantResponse, getEffectiveBrandName } from "@/lib/tenant"
 
 export function DashboardHeader({ tenant }: { tenant: TenantResponse | null }) {
-  const inspectorName = "Marcus Reyes"
+  const inspectorName = tenant?.theme_config.inspector_name ?? "Inspector"
+  const initials = (tenant?.theme_config.inspector_name ?? "IN")
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase())
+    .slice(0, 2)
+    .join("")
   const brandName = tenant ? getEffectiveBrandName(tenant) : "InspectIQ"
   const logoUrl = tenant?.theme_config.logo_url ?? null
 
@@ -46,7 +52,7 @@ export function DashboardHeader({ tenant }: { tenant: TenantResponse | null }) {
             <DropdownMenuTrigger className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Avatar className="size-8">
                 <AvatarFallback className="bg-secondary text-xs font-medium text-secondary-foreground">
-                  MR
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <span className="hidden font-medium text-foreground sm:inline">
@@ -60,9 +66,11 @@ export function DashboardHeader({ tenant }: { tenant: TenantResponse | null }) {
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuLabel className="flex flex-col gap-0.5">
                 <span>{inspectorName}</span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  FL License #HI-7421
-                </span>
+                {tenant?.theme_config.license_number && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    FL License #{tenant.theme_config.license_number}
+                  </span>
+                )}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
