@@ -109,9 +109,9 @@ export function InspectionHeader({
                 {transitionStatus === "loading" ? "Updating…" : txConfig.label}
               </Button>
             )}
-            <Button size="sm" variant="outline" onClick={onEditFindings}>
+            <Button size="sm" variant="outline" title="Edit Findings" onClick={onEditFindings}>
               <FileEditIcon data-icon="inline-start" />
-              Edit Findings
+              <span className="hidden md:inline">Edit Findings</span>
             </Button>
             <a
               href={`/api/inspections/${inspectionId}/agreement`}
