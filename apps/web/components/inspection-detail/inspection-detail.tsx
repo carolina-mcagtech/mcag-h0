@@ -208,8 +208,11 @@ export function InspectionDetail({
             onChange={(v) => setField("roof_permit_number", v)}
           />
           <TextField
-            label="Roof Date"
-            type="date"
+            label="Roof Year"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]{4}"
+            placeholder="e.g. 2019"
             value={data.roof_date}
             onChange={(v) => setField("roof_date", v)}
           />

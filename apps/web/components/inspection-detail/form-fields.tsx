@@ -20,12 +20,16 @@ export function TextField({
   onChange,
   type = "text",
   placeholder,
+  inputMode,
+  pattern,
 }: {
   label: string
   value: string | null
   onChange: (v: string | null) => void
   type?: "text" | "tel" | "email" | "date" | "datetime-local"
   placeholder?: string
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"]
+  pattern?: string
 }) {
   const id = `f-${label.replace(/\s+/g, "-").toLowerCase()}`
   return (
@@ -36,6 +40,9 @@ export function TextField({
         type={type}
         value={value ?? ""}
         placeholder={placeholder}
+        inputMode={inputMode}
+        pattern={pattern}
+        className="w-full max-w-full"
         onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
       />
     </Field>

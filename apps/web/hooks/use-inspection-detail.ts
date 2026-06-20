@@ -58,6 +58,9 @@ function normalizeInitial(d: InspectionDetailData): InspectionDetailData {
     scheduled_at: d.scheduled_at
       ? d.scheduled_at.replace(/:\d{2}(\.\d+)?Z?$/, "").slice(0, 16)
       : null,
+    roof_date: d.roof_date
+      ? String(new Date(d.roof_date).getFullYear())
+      : null,
   }
 }
 
