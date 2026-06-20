@@ -2,7 +2,7 @@
 
 import { ArrowLeftIcon, CheckIcon, DownloadIcon, FileEditIcon, FileTextIcon, MapPinIcon } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
   INSPECTION_STATUS_META,
@@ -113,18 +113,24 @@ export function InspectionHeader({
               <FileEditIcon data-icon="inline-start" />
               Edit Findings
             </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={`/api/inspections/${inspectionId}/agreement`} download="inspection-agreement.pdf">
-                <FileTextIcon data-icon="inline-start" />
-                Send Agreement
-              </a>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={`/api/inspections/${inspectionId}/report`} download>
-                <DownloadIcon data-icon="inline-start" />
-                Download Report
-              </a>
-            </Button>
+            <a
+              href={`/api/inspections/${inspectionId}/agreement`}
+              download="inspection-agreement.pdf"
+              title="Send Agreement"
+              className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+            >
+              <FileTextIcon data-icon="inline-start" />
+              <span className="hidden md:inline">Send Agreement</span>
+            </a>
+            <a
+              href={`/api/inspections/${inspectionId}/report`}
+              download
+              title="Download Report"
+              className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+            >
+              <DownloadIcon data-icon="inline-start" />
+              <span className="hidden md:inline">Download Report</span>
+            </a>
           </div>
           {transitionStatus === "error" && transitionError && (
             <p className="text-xs text-destructive">{transitionError}</p>
