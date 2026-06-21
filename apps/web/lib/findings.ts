@@ -11,6 +11,8 @@ export const SECTIONS = [
   "ROOF",
   "KITCHEN",
   "INTERIOR",
+  "BEDROOMS",
+  "BATHROOMS",
   "AIR_CONDITIONING",
   "COMMENTS",
   "COST_ESTIMATION",
@@ -35,6 +37,8 @@ export const SECTION_LABELS: Record<Section, string> = {
   COST_ESTIMATION: "Cost Estimation",
   COUNTY_INFO: "County Info",
   DISCLOSURE: "Disclosure",
+  BEDROOMS: "Bedrooms",
+  BATHROOMS: "Bathrooms",
 }
 
 export const CONDITIONS = ["GOOD", "MARGINAL", "DEFECTIVE", "N_A"] as const
@@ -149,6 +153,16 @@ export const SECTION_CONFIG: Record<Section, SectionConfig> = {
     conditionRule: "forbidden",
     showEstimatedCost: false,
     helper: "Disclosure statements and narrative notes. No condition rating.",
+  },
+  BEDROOMS: {
+    conditionRule: "optional",
+    showEstimatedCost: false,
+    helper: "Bedroom conditions and observations.",
+  },
+  BATHROOMS: {
+    conditionRule: "optional",
+    showEstimatedCost: false,
+    helper: "Bathroom conditions and observations.",
   },
 }
 

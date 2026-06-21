@@ -23,7 +23,8 @@ interface SectionPanelProps {
   onRetry: (id: string) => void
   onMobileBack: () => void
   inspectionId: string
-  sectionCatalog: SectionCatalog | undefined
+  catalogSections: string[]
+  catalogData: Record<string, SectionCatalog>
   numBedrooms: number
   numBathrooms: number
 }
@@ -52,7 +53,8 @@ export function SectionPanel({
   onRetry,
   onMobileBack,
   inspectionId,
-  sectionCatalog,
+  catalogSections,
+  catalogData,
   numBedrooms,
   numBathrooms,
 }: SectionPanelProps) {
@@ -101,17 +103,32 @@ export function SectionPanel({
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-5">
-        {/* ── Observations panel (stacked above findings) ───────────── */}
-        {sectionCatalog && (
+        {/* ── Observations panels (stacked above findings) ──────────── */}
+        {catalogSections.length > 0 && (
           <>
-            <ObservationsPanel
-              key={section}
-              inspectionId={inspectionId}
-              section={section}
-              catalog={sectionCatalog}
-              numBedrooms={numBedrooms}
-              numBathrooms={numBathrooms}
-            />
+            {catalogSections.map((cs, idx) => {
+              const catalog = catalogData[cs]
+              if (!catalog) return null
+              return (
+                <div key={cs}>
+                  {catalogSections.length > 1 && (
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {catalog.label}
+                    </p>
+                  )}
+                  <ObservationsPanel
+                    inspectionId={inspectionId}
+                    section={cs}
+                    catalog={catalog}
+                    numBedrooms={numBedrooms}
+                    numBathrooms={numBathrooms}
+                  />
+                  {idx < catalogSections.length - 1 && (
+                    <div className="my-4 border-t border-border/60" />
+                  )}
+                </div>
+              )
+            })}
             <div className="my-5 border-t border-border" />
           </>
         )}

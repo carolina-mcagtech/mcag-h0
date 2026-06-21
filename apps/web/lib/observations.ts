@@ -52,3 +52,22 @@ export const CONDITION_LABELS: Record<ComponentCondition, string> = {
 }
 
 export const CONDITIONS: ComponentCondition[] = ["GOOD", "MARGINAL", "DEFECTIVE", "N_A"]
+
+export const FINDINGS_TO_CATALOG_SECTION: Record<string, string | string[] | null> = {
+  INSULATION: "INSULATION_VENTILATION",
+  KITCHEN: ["INTERIOR_KITCHEN_DINING", "INTERIOR_APPLIANCES"],
+  AIR_CONDITIONING: "AIR_CONDITIONING",
+  STRUCTURAL: "STRUCTURAL",
+  EXTERIOR: "EXTERIOR",
+  ROOF: "ROOF",
+  ELECTRICAL: "ELECTRICAL",
+  PLUMBING: "PLUMBING",
+  FRONT: null,
+  INTERIOR: null,
+  COMMENTS: null,
+  COST_ESTIMATION: null,
+  COUNTY_INFO: null,
+  DISCLOSURE: null,
+  BEDROOMS: "BEDROOMS",
+  BATHROOMS: "BATHROOMS",
+}

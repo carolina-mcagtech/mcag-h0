@@ -36,6 +36,8 @@ export interface NewInspectionPayload {
   inspectionTypes: InspectionType[]
   totalFee: number
   paymentTiming: PaymentTiming
+  num_bedrooms: number
+  num_bathrooms: number
 }
 
 export interface Inspection {

@@ -3,6 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 /* shadcn/ui CSS variables — Tailwind v3 HSL channel format */
 :root {
   --background: 210 17% 98%;

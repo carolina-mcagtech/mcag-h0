@@ -6,8 +6,14 @@ import { PageHeader } from "@/components/findings/page-header"
 import { SectionSidebar } from "@/components/findings/section-sidebar"
 import { SectionPanel } from "@/components/findings/section-panel"
 import { type Finding, type InspectionMeta, type Section } from "@/lib/findings"
-import { type SectionCatalog } from "@/lib/observations"
+import { type SectionCatalog, FINDINGS_TO_CATALOG_SECTION } from "@/lib/observations"
 import { cn } from "@/lib/utils"
+
+function resolveCatalogSections(activeSection: Section): string[] {
+  const raw = FINDINGS_TO_CATALOG_SECTION[activeSection] ?? null
+  if (raw === null) return []
+  return Array.isArray(raw) ? raw : [raw]
+}
 
 interface FindingsEntryProps {
   initialFindings: Finding[]
@@ -81,7 +87,8 @@ export function FindingsEntry({
             onRetry={retryFinding}
             onMobileBack={() => setShowMobilePanel(false)}
             inspectionId={inspection.id}
-            sectionCatalog={catalogData[activeSection]}
+            catalogSections={resolveCatalogSections(activeSection)}
+            catalogData={catalogData}
             numBedrooms={numBedrooms}
             numBathrooms={numBathrooms}
           />

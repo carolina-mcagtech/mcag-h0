@@ -13,6 +13,8 @@ export interface NewInspectionFormState {
   inspectionTypes: InspectionType[]
   totalFee: string
   paymentTiming: PaymentTiming | ""
+  numBedrooms: string
+  numBathrooms: string
 }
 
 const INITIAL_STATE: NewInspectionFormState = {
@@ -21,6 +23,8 @@ const INITIAL_STATE: NewInspectionFormState = {
   inspectionTypes: [],
   totalFee: "",
   paymentTiming: "",
+  numBedrooms: "0",
+  numBathrooms: "0",
 }
 
 function parseFee(raw: string): number {
@@ -76,6 +80,8 @@ export function useNewInspectionForm() {
       inspectionTypes: state.inspectionTypes,
       totalFee: fee,
       paymentTiming: state.paymentTiming as PaymentTiming,
+      num_bedrooms: parseInt(state.numBedrooms) || 0,
+      num_bathrooms: parseInt(state.numBathrooms) || 0,
     }
   }, [state, fee])
 

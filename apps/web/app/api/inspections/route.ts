@@ -34,6 +34,8 @@ export async function POST(req: NextRequest) {
     inspectionTypes: string[]
     totalFee: number
     paymentTiming: string
+    numBedrooms?: number
+    numBathrooms?: number
   }
   try {
     body = await req.json()
@@ -48,6 +50,8 @@ export async function POST(req: NextRequest) {
     inspection_types: body.inspectionTypes,
     total_fee: String(body.totalFee),
     payment_timing: body.paymentTiming,
+    num_bedrooms: body.numBedrooms ?? 0,
+    num_bathrooms: body.numBathrooms ?? 0,
   }
 
   const res = await fetch(`${API_BASE}/inspections`, {

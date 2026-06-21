@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { type TenantResponse, getEffectiveBrandName } from "@/lib/tenant"
 
+async function handleSignOut() {
+  await fetch("/api/auth/logout", { method: "POST" })
+  window.location.href = "/login"
+}
+
 export function DashboardHeader({ tenant }: { tenant: TenantResponse | null }) {
   const inspectorName = tenant?.theme_config.inspector_name ?? "Inspector"
   const initials = (tenant?.theme_config.inspector_name ?? "IN")
@@ -82,7 +87,7 @@ export function DashboardHeader({ tenant }: { tenant: TenantResponse | null }) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut}>
                 <LogOut className="size-4" aria-hidden="true" />
                 Sign out
               </DropdownMenuItem>

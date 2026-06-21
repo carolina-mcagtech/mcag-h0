@@ -225,6 +225,37 @@ export function NewInspectionModal({
                   </Select.Portal>
                 </Select.Root>
               </div>
+              {/* Bedrooms & Bathrooms */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="numBedrooms" className={labelClass}>
+                    Bedrooms
+                  </label>
+                  <input
+                    id="numBedrooms"
+                    type="number"
+                    min={0}
+                    max={10}
+                    className={inputClass}
+                    value={form.state.numBedrooms}
+                    onChange={(e) => form.setField("numBedrooms", e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="numBathrooms" className={labelClass}>
+                    Bathrooms
+                  </label>
+                  <input
+                    id="numBathrooms"
+                    type="number"
+                    min={0}
+                    max={10}
+                    className={inputClass}
+                    value={form.state.numBathrooms}
+                    onChange={(e) => form.setField("numBathrooms", e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
             <footer className="flex flex-col gap-3 border-t border-border px-6 py-4">
