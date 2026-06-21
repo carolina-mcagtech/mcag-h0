@@ -2,14 +2,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 export function LoginForm() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -28,8 +26,8 @@ export function LoginForm() {
       })
 
       if (res.ok) {
-        router.push("/inspections")
-        router.refresh()
+        await new Promise(resolve => setTimeout(resolve, 100))
+        window.location.href = "/inspections"
       } else {
         const body = (await res.json()) as { error?: string }
         setError(body.error ?? "Sign in failed. Please try again.")

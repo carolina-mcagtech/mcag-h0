@@ -154,12 +154,8 @@ class Inspection(Base, TenantScopedMixin, TimestampMixin):
     rooms: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default="{}")
 
     # ── Room counts (drives BEDROOMS / BATHROOMS observation sections) ────────
-    num_bedrooms: Mapped[int] = mapped_column(
-        SmallInteger, nullable=False, default=0, server_default="0"
-    )
-    num_bathrooms: Mapped[int] = mapped_column(
-        SmallInteger, nullable=False, default=0, server_default="0"
-    )
+    num_bedrooms: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0, server_default="0")
+    num_bathrooms: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0, server_default="0")
 
     # ── Wind mitigation ──────────────────────────────────────────────────────
     wind_mit_doors_protected: Mapped[bool] = mapped_column(

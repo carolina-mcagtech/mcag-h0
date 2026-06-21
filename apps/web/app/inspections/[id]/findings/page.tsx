@@ -8,12 +8,15 @@ import {
   mapFindingResponse,
 } from "@/lib/findings"
 import { type InspectionStatus } from "@/lib/inspections"
+import { type SectionCatalog } from "@/lib/observations"
 import { FindingsEntry } from "@/components/findings/findings-entry"
 
 interface ApiInspection {
   id: string
   property_address: string
   status: InspectionStatus
+  num_bedrooms: number
+  num_bathrooms: number
 }
 
 export default async function FindingsPage({
@@ -26,9 +29,10 @@ export default async function FindingsPage({
 
   const { id } = params
 
-  const [inspectionResult, findingsResult] = await Promise.all([
+  const [inspectionResult, findingsResult, catalogResult] = await Promise.all([
     apiFetch<ApiInspection>(`/inspections/${id}`),
     apiFetch<FindingResponse[]>(`/inspections/${id}/findings?grouped=false`),
+    apiFetch<Record<string, SectionCatalog>>(`/inspections/${id}/observations/catalog`),
   ])
 
   if (!inspectionResult.ok || !findingsResult.ok) redirect("/login")
@@ -40,6 +44,15 @@ export default async function FindingsPage({
   }
 
   const initialFindings = findingsResult.data.map(mapFindingResponse)
+  const catalogData = catalogResult.ok ? catalogResult.data : {}
 
-  return <FindingsEntry initialFindings={initialFindings} inspection={inspection} />
+  return (
+    <FindingsEntry
+      initialFindings={initialFindings}
+      inspection={inspection}
+      catalogData={catalogData}
+      numBedrooms={inspectionResult.data.num_bedrooms ?? 0}
+      numBathrooms={inspectionResult.data.num_bathrooms ?? 0}
+    />
+  )
 }

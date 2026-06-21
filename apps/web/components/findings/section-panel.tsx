@@ -3,6 +3,7 @@
 import { ArrowLeftIcon, Plus, ClipboardList } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FindingRow } from "@/components/findings/finding-row"
+import { ObservationsPanel } from "@/components/findings/observations-panel"
 import {
   SECTION_CONFIG,
   SECTION_LABELS,
@@ -10,6 +11,7 @@ import {
   type Finding,
   type Section,
 } from "@/lib/findings"
+import { type SectionCatalog } from "@/lib/observations"
 import { cn } from "@/lib/utils"
 
 interface SectionPanelProps {
@@ -20,6 +22,10 @@ interface SectionPanelProps {
   onRemove: (id: string) => void
   onRetry: (id: string) => void
   onMobileBack: () => void
+  inspectionId: string
+  sectionCatalog: SectionCatalog | undefined
+  numBedrooms: number
+  numBathrooms: number
 }
 
 const RULE_BADGE: Record<string, { label: string; className: string }> = {
@@ -45,6 +51,10 @@ export function SectionPanel({
   onRemove,
   onRetry,
   onMobileBack,
+  inspectionId,
+  sectionCatalog,
+  numBedrooms,
+  numBathrooms,
 }: SectionPanelProps) {
   const config = SECTION_CONFIG[section]
   const rule = RULE_BADGE[config.conditionRule]
@@ -91,6 +101,22 @@ export function SectionPanel({
       </header>
 
       <div className="flex-1 overflow-y-auto px-6 py-5">
+        {/* ── Observations panel (stacked above findings) ───────────── */}
+        {sectionCatalog && (
+          <>
+            <ObservationsPanel
+              key={section}
+              inspectionId={inspectionId}
+              section={section}
+              catalog={sectionCatalog}
+              numBedrooms={numBedrooms}
+              numBathrooms={numBathrooms}
+            />
+            <div className="my-5 border-t border-border" />
+          </>
+        )}
+
+        {/* ── Findings list ─────────────────────────────────────────── */}
         {findings.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
             <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-muted-foreground">

@@ -6,14 +6,24 @@ import { PageHeader } from "@/components/findings/page-header"
 import { SectionSidebar } from "@/components/findings/section-sidebar"
 import { SectionPanel } from "@/components/findings/section-panel"
 import { type Finding, type InspectionMeta, type Section } from "@/lib/findings"
+import { type SectionCatalog } from "@/lib/observations"
 import { cn } from "@/lib/utils"
 
 interface FindingsEntryProps {
   initialFindings: Finding[]
   inspection: InspectionMeta
+  catalogData: Record<string, SectionCatalog>
+  numBedrooms: number
+  numBathrooms: number
 }
 
-export function FindingsEntry({ initialFindings, inspection }: FindingsEntryProps) {
+export function FindingsEntry({
+  initialFindings,
+  inspection,
+  catalogData,
+  numBedrooms,
+  numBathrooms,
+}: FindingsEntryProps) {
   const {
     findingsBySection,
     counts,
@@ -70,6 +80,10 @@ export function FindingsEntry({ initialFindings, inspection }: FindingsEntryProp
             onRemove={removeFinding}
             onRetry={retryFinding}
             onMobileBack={() => setShowMobilePanel(false)}
+            inspectionId={inspection.id}
+            sectionCatalog={catalogData[activeSection]}
+            numBedrooms={numBedrooms}
+            numBathrooms={numBathrooms}
           />
         </main>
       </div>

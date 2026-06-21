@@ -16,17 +16,13 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # ── Enum types ────────────────────────────────────────────────────────────
-    # Guard with DO $$ so re-running on an already-migrated schema is safe.
-    op.execute("""
-        DO $$ BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'component_condition') THEN
-                CREATE TYPE component_condition AS ENUM ('GOOD', 'MARGINAL', 'DEFECTIVE', 'N_A');
-            END IF;
-        END $$
-    """)
+    # ── Ensure mcagapp_admin has DDL privileges for this migration ────────────
+    op.execute("GRANT CREATE ON SCHEMA public TO mcagapp_admin")
+    op.execute("GRANT USAGE ON SCHEMA public TO mcagapp_admin")
 
     # ── component_observations ────────────────────────────────────────────────
+    # condition uses VARCHAR(20) + CHECK constraint instead of a custom ENUM
+    # type so that mcagapp_admin (no CREATE TYPE privilege) can run this migration.
     op.create_table(
         "component_observations",
         sa.Column(
@@ -47,14 +43,10 @@ def upgrade() -> None:
         sa.Column("section", sa.Text(), nullable=False),
         sa.Column("item_key", sa.Text(), nullable=False),
         sa.Column("item_label", sa.Text(), nullable=False),
-        sa.Column(
-            "condition",
-            postgresql.ENUM(
-                "GOOD", "MARGINAL", "DEFECTIVE", "N_A",
-                name="component_condition",
-                create_type=False,
-            ),
-            nullable=False,
+        sa.Column("condition", sa.String(20), nullable=False),
+        sa.CheckConstraint(
+            "condition IN ('GOOD', 'MARGINAL', 'DEFECTIVE', 'N_A')",
+            name="ck_co_condition",
         ),
         sa.Column("observations", sa.Text(), nullable=True),
         sa.Column("room_type", sa.Text(), nullable=True),
@@ -230,4 +222,3 @@ def downgrade() -> None:
     op.execute("DROP POLICY IF EXISTS tenant_isolation ON component_observations")
     op.drop_table("section_metadata", if_exists=True)
     op.drop_table("component_observations", if_exists=True)
-    op.execute("DROP TYPE IF EXISTS component_condition")

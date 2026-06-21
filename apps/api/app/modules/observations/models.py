@@ -2,7 +2,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Enum as SAEnum, SmallInteger, Text
+from sqlalchemy import SmallInteger, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,10 +31,8 @@ class ComponentObservation(Base, TenantScopedMixin, TimestampMixin):
     section: Mapped[str] = mapped_column(Text, nullable=False)
     item_key: Mapped[str] = mapped_column(Text, nullable=False)
     item_label: Mapped[str] = mapped_column(Text, nullable=False)
-    condition: Mapped[ComponentCondition] = mapped_column(
-        SAEnum(ComponentCondition, name="component_condition", create_type=False),
-        nullable=False,
-    )
+    # VARCHAR(20) + CHECK constraint (no custom ENUM type — avoids DDL privilege requirement)
+    condition: Mapped[str] = mapped_column(String(20), nullable=False)
     observations: Mapped[str | None] = mapped_column(Text, nullable=True)
     room_type: Mapped[str | None] = mapped_column(Text, nullable=True)
     room_index: Mapped[int] = mapped_column(
