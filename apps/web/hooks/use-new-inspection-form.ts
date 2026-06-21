@@ -74,14 +74,15 @@ export function useNewInspectionForm() {
   }, [state, fee])
 
   const getPayload = useCallback((): NewInspectionPayload => {
+    console.log("payload bedrooms:", state.numBedrooms, parseInt(state.numBedrooms, 10))
     return {
       propertyAddress: state.propertyAddress.trim(),
       scheduledAt: state.scheduledAt,
       inspectionTypes: state.inspectionTypes,
       totalFee: fee,
       paymentTiming: state.paymentTiming as PaymentTiming,
-      num_bedrooms: parseInt(state.numBedrooms) || 0,
-      num_bathrooms: parseInt(state.numBathrooms) || 0,
+      num_bedrooms: Math.max(0, parseInt(state.numBedrooms, 10) || 0),
+      num_bathrooms: Math.max(0, parseInt(state.numBathrooms, 10) || 0),
     }
   }, [state, fee])
 
