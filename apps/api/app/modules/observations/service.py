@@ -65,7 +65,7 @@ async def upsert_observation(
             sort_order=item_def["sort_order"],
         )
         .on_conflict_do_update(
-            constraint="uq_co_inspection_section_item_room",
+            constraint="component_observations_inspection_id_section_item_key_room__key",
             set_={
                 "condition": payload.condition,
                 "observations": payload.observations,
@@ -104,7 +104,7 @@ async def upsert_section_metadata(
             data=payload.data,
         )
         .on_conflict_do_update(
-            constraint="uq_sm_inspection_section",
+            constraint="section_metadata_inspection_id_section_key",
             set_={
                 # Merge JSONB: existing fields not in payload.data are preserved.
                 "data": text("section_metadata.data || EXCLUDED.data"),
