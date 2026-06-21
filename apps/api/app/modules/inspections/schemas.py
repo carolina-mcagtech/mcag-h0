@@ -56,6 +56,9 @@ class InspectionCreate(BaseModel):
     appliances: dict = Field(default_factory=dict)
     rooms: dict = Field(default_factory=dict)
 
+    num_bedrooms: int = 0
+    num_bathrooms: int = 0
+
     wind_mit_doors_protected: bool = False
     wind_mit_windows_protected: bool = False
 
@@ -107,6 +110,9 @@ class InspectionUpdate(BaseModel):
 
     appliances: dict | None = None
     rooms: dict | None = None
+
+    num_bedrooms: int | None = None
+    num_bathrooms: int | None = None
 
     wind_mit_doors_protected: bool | None = None
     wind_mit_windows_protected: bool | None = None
@@ -166,6 +172,9 @@ class InspectionResponse(InspectionListResponse):
 
     appliances: dict
     rooms: dict
+
+    num_bedrooms: int
+    num_bathrooms: int
 
     wind_mit_doors_protected: bool
     wind_mit_windows_protected: bool

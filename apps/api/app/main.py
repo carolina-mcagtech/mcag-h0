@@ -14,6 +14,7 @@ from app.modules.findings.router import router as findings_router
 from app.modules.inspections.router import router as inspections_router
 from app.modules.inspectors.router import router as inspectors_router
 from app.modules.media.router import router as media_router
+from app.modules.observations.router import router as observations_router
 from app.modules.properties.router import router as properties_router
 from app.modules.reports.router import router as reports_router
 from app.modules.tenants.router import internal_router, router as tenants_router
@@ -30,6 +31,7 @@ import app.modules.agreements.models  # noqa: F401
 import app.modules.findings.models  # noqa: F401
 import app.modules.reports.models  # noqa: F401
 import app.modules.media.models  # noqa: F401
+import app.modules.observations.models  # noqa: F401
 
 app = FastAPI(title="MCAG Technologies API")
 app.add_middleware(TenantMiddleware)
@@ -49,6 +51,7 @@ app.include_router(inspectors_router)
 app.include_router(inspections_router)
 app.include_router(agreements_router)
 app.include_router(findings_router)
+app.include_router(observations_router)
 app.include_router(reports_router)
 app.include_router(media_router)
 
