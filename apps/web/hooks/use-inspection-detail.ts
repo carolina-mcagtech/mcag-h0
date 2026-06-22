@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { InspectionDetailData } from "@/lib/inspection-detail"
 
-export type SaveStatus = "idle" | "saving" | "saved" | "error"
+export type SaveStatus = "idle" | "saving" | "saved" | "error" | "warning"
 export type TransitionStatus = "idle" | "loading" | "error"
 
 const DEBOUNCE_MS = 800
@@ -103,6 +103,10 @@ export function useInspectionDetail(initial: InspectionDetailData) {
       }
       if (res.ok) {
         setSaveStatus("saved")
+        if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+        savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), SAVED_RESET_MS)
+      } else if (res.status === 409) {
+        setSaveStatus("warning")
         if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
         savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), SAVED_RESET_MS)
       } else {

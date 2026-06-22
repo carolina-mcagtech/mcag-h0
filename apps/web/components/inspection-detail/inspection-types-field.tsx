@@ -11,11 +11,14 @@ import {
 export function InspectionTypesField({
   value,
   onChange,
+  disabled,
 }: {
   value: InspectionTypeValue[]
   onChange: (v: InspectionTypeValue[]) => void
+  disabled?: boolean
 }) {
   function toggle(option: InspectionTypeValue) {
+    if (disabled) return
     if (value.includes(option)) {
       onChange(value.filter((v) => v !== option))
     } else {
@@ -30,7 +33,7 @@ export function InspectionTypesField({
       <FieldLabel>
         Inspection Types <span className="text-destructive">*</span>
       </FieldLabel>
-      <div className="flex flex-wrap gap-2">
+      <div className={cn("flex flex-wrap gap-2", disabled && "opacity-60 pointer-events-none")}>
         {INSPECTION_TYPE_OPTIONS.map((opt) => {
           const selected = value.includes(opt.value)
           return (
@@ -38,6 +41,7 @@ export function InspectionTypesField({
               key={opt.value}
               type="button"
               aria-pressed={selected}
+              disabled={disabled}
               onClick={() => toggle(opt.value)}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",

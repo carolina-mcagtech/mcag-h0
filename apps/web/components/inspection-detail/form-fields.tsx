@@ -1,5 +1,6 @@
 "use client"
 
+import { cn } from "@/lib/utils"
 import { Field, FieldLabel, FieldContent } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -22,6 +23,7 @@ export function TextField({
   placeholder,
   inputMode,
   pattern,
+  disabled,
 }: {
   label: string
   value: string | null
@@ -30,6 +32,7 @@ export function TextField({
   placeholder?: string
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"]
   pattern?: string
+  disabled?: boolean
 }) {
   const id = `f-${label.replace(/\s+/g, "-").toLowerCase()}`
   return (
@@ -42,6 +45,7 @@ export function TextField({
         placeholder={placeholder}
         inputMode={inputMode}
         pattern={pattern}
+        disabled={disabled}
         className="w-full max-w-full"
         onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
       />
@@ -54,11 +58,13 @@ export function NumberField({
   value,
   onChange,
   placeholder,
+  disabled,
 }: {
   label: string
   value: number | null
   onChange: (v: number | null) => void
   placeholder?: string
+  disabled?: boolean
 }) {
   const id = `f-${label.replace(/\s+/g, "-").toLowerCase()}`
   return (
@@ -70,6 +76,7 @@ export function NumberField({
         inputMode="numeric"
         value={value ?? ""}
         placeholder={placeholder}
+        disabled={disabled}
         onChange={(e) =>
           onChange(e.target.value === "" ? null : Number(e.target.value))
         }
@@ -82,10 +89,12 @@ export function CurrencyField({
   label,
   value,
   onChange,
+  disabled,
 }: {
   label: string
   value: number | null
   onChange: (v: number | null) => void
+  disabled?: boolean
 }) {
   const id = `f-${label.replace(/\s+/g, "-").toLowerCase()}`
   return (
@@ -102,6 +111,7 @@ export function CurrencyField({
           step="0.01"
           className="pl-6"
           value={value ?? ""}
+          disabled={disabled}
           onChange={(e) =>
             onChange(e.target.value === "" ? null : Number(e.target.value))
           }
@@ -117,12 +127,14 @@ export function SelectField({
   onChange,
   options,
   placeholder = "Select…",
+  disabled,
 }: {
   label: string
   value: string | null
   onChange: (v: string | null) => void
   options: readonly Option[]
   placeholder?: string
+  disabled?: boolean
 }) {
   return (
     <Field>
@@ -130,6 +142,7 @@ export function SelectField({
       <Select
         value={value ?? ""}
         onValueChange={(v) => onChange(v || null)}
+        disabled={disabled}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
@@ -151,11 +164,13 @@ export function TextareaField({
   value,
   onChange,
   placeholder,
+  disabled,
 }: {
   label: string
   value: string | null
   onChange: (v: string | null) => void
   placeholder?: string
+  disabled?: boolean
 }) {
   const id = `f-${label.replace(/\s+/g, "-").toLowerCase()}`
   return (
@@ -166,6 +181,7 @@ export function TextareaField({
         rows={4}
         value={value ?? ""}
         placeholder={placeholder}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value === "" ? null : e.target.value)}
       />
     </Field>
@@ -177,17 +193,23 @@ export function SwitchField({
   description,
   checked,
   onChange,
+  disabled,
 }: {
   label: string
   description?: string
   checked: boolean
   onChange: (v: boolean) => void
+  disabled?: boolean
 }) {
   return (
     <Field
       orientation="horizontal"
-      className="cursor-pointer rounded-lg border p-3.5"
+      className={cn(
+        "rounded-lg border p-3.5",
+        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+      )}
       onClickCapture={(e) => {
+        if (disabled) return
         // Capture phase intercept: stop propagation so the click never reaches
         // Base UI Switch internals. If it did, Base UI would dispatch a
         // synthetic click to the hidden checkbox which bubbles back up here,
@@ -202,7 +224,7 @@ export function SwitchField({
           <p className="text-sm text-muted-foreground">{description}</p>
         ) : null}
       </FieldContent>
-      <Switch checked={checked} />
+      <Switch checked={checked} disabled={disabled} />
     </Field>
   )
 }

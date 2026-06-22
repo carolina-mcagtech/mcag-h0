@@ -279,27 +279,23 @@ export function ObservationsPanel({
           </h3>
 
           {catalog.is_room_based ? (
-            /* Room-based: group by room */
-            rooms === null || rooms.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Set the number of{" "}
-                {section === "BEDROOMS" ? "bedrooms" : "bathrooms"} in the
-                inspection details to enable room observations.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {rooms.map((room) => (
-                  <div key={room.room_index} className="space-y-1">
-                    <p className="text-xs font-medium text-foreground">
-                      {room.room_label}
-                    </p>
-                    <div className="rounded-md border border-border/60 bg-muted/10">
-                      {renderItems(room.room_index, room.room_label)}
-                    </div>
+            /* Room-based: group by room. When no rooms configured, fall back to a
+               single "General" room at index 0 so the inspector isn't blocked. */
+            <div className="space-y-4">
+              {(rooms === null || rooms.length === 0
+                ? [{ room_index: 0, room_label: "General" }]
+                : rooms
+              ).map((room) => (
+                <div key={room.room_index} className="space-y-1">
+                  <p className="text-xs font-medium text-foreground">
+                    {room.room_label}
+                  </p>
+                  <div className="rounded-md border border-border/60 bg-muted/10">
+                    {renderItems(room.room_index, room.room_label)}
                   </div>
-                ))}
-              </div>
-            )
+                </div>
+              ))}
+            </div>
           ) : (
             /* Non-room: flat list at room_index=0 */
             <div className="rounded-md border border-border/60 bg-muted/10">

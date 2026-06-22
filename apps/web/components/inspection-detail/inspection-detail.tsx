@@ -44,6 +44,8 @@ export function InspectionDetail({
   const router = useRouter()
   const { data, setField, saveStatus, transition, transitionStatus, transitionError } = useInspectionDetail(inspection)
 
+  const readOnly = data.status === "DELIVERED" || data.status === "PUBLISHED"
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <InspectionHeader
@@ -59,6 +61,11 @@ export function InspectionDetail({
       />
 
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 md:px-6">
+      {readOnly && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          This inspection has been delivered and is read-only.
+        </div>
+      )}
       <FindingsSummary data={findings} />
 
       <div className="flex flex-col gap-6">
@@ -74,6 +81,7 @@ export function InspectionDetail({
               value={data.property_address}
               onChange={(v) => setField("property_address", v ?? "")}
               placeholder="123 Main St, Miami, FL 33101"
+              disabled={readOnly}
             />
           </div>
           <TextField
@@ -81,16 +89,19 @@ export function InspectionDetail({
             type="datetime-local"
             value={data.scheduled_at}
             onChange={(v) => setField("scheduled_at", v)}
+            disabled={readOnly}
           />
           <CurrencyField
             label="Total Fee"
             value={data.total_fee}
             onChange={(v) => setField("total_fee", v)}
+            disabled={readOnly}
           />
           <div className="sm:col-span-2">
             <InspectionTypesField
               value={data.inspection_types}
               onChange={(v) => setField("inspection_types", v)}
+              disabled={readOnly}
             />
           </div>
           <SelectField
@@ -100,6 +111,7 @@ export function InspectionDetail({
               setField("payment_timing", v as InspectionDetailData["payment_timing"])
             }
             options={PAYMENT_TIMING_OPTIONS}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -113,21 +125,25 @@ export function InspectionDetail({
             label="Year Built"
             value={data.year_built}
             onChange={(v) => setField("year_built", v)}
+            disabled={readOnly}
           />
           <NumberField
             label="Adjusted Sq Ft"
             value={data.adj_sqft}
             onChange={(v) => setField("adj_sqft", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Gate Code"
             value={data.gate_code}
             onChange={(v) => setField("gate_code", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Lockbox"
             value={data.lockbox}
             onChange={(v) => setField("lockbox", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -141,40 +157,47 @@ export function InspectionDetail({
             label="Realtor Name"
             value={data.realtor_name}
             onChange={(v) => setField("realtor_name", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Realtor Cell"
             type="tel"
             value={data.realtor_cell}
             onChange={(v) => setField("realtor_cell", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Owner / Buyer Name"
             value={data.owner_buyer_name}
             onChange={(v) => setField("owner_buyer_name", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Owner / Buyer Cell"
             type="tel"
             value={data.owner_buyer_cell}
             onChange={(v) => setField("owner_buyer_cell", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Owner / Buyer Email"
             type="email"
             value={data.owner_buyer_email}
             onChange={(v) => setField("owner_buyer_email", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Listing Agent Name"
             value={data.listing_agent_name}
             onChange={(v) => setField("listing_agent_name", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Listing Agent Cell"
             type="tel"
             value={data.listing_agent_cell}
             onChange={(v) => setField("listing_agent_cell", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -188,11 +211,13 @@ export function InspectionDetail({
             label="Full Report Number"
             value={data.full_report_number}
             onChange={(v) => setField("full_report_number", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Insurance Report Number"
             value={data.insurance_report_number}
             onChange={(v) => setField("insurance_report_number", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -206,6 +231,7 @@ export function InspectionDetail({
             label="Roof Permit Number"
             value={data.roof_permit_number}
             onChange={(v) => setField("roof_permit_number", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Roof Year"
@@ -215,16 +241,19 @@ export function InspectionDetail({
             placeholder="e.g. 2019"
             value={data.roof_date}
             onChange={(v) => setField("roof_date", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Roof Style"
             value={data.roof_style}
             onChange={(v) => setField("roof_style", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Roof Type"
             value={data.roof_type}
             onChange={(v) => setField("roof_type", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -239,16 +268,19 @@ export function InspectionDetail({
             label="Type"
             value={data.water_heater_type}
             onChange={(v) => setField("water_heater_type", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Location"
             value={data.water_heater_location}
             onChange={(v) => setField("water_heater_location", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Capacity"
             value={data.water_heater_capacity}
             onChange={(v) => setField("water_heater_capacity", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -263,16 +295,19 @@ export function InspectionDetail({
             label="Brand"
             value={data.electrical_brand}
             onChange={(v) => setField("electrical_brand", v)}
+            disabled={readOnly}
           />
           <NumberField
             label="Amps"
             value={data.electrical_amps}
             onChange={(v) => setField("electrical_amps", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Location"
             value={data.electrical_location}
             onChange={(v) => setField("electrical_location", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -286,21 +321,25 @@ export function InspectionDetail({
             label="Brand"
             value={data.hvac_brand}
             onChange={(v) => setField("hvac_brand", v)}
+            disabled={readOnly}
           />
           <NumberField
             label="Age (years)"
             value={data.hvac_age}
             onChange={(v) => setField("hvac_age", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Model"
             value={data.hvac_model}
             onChange={(v) => setField("hvac_model", v)}
+            disabled={readOnly}
           />
           <TextField
             label="Series"
             value={data.hvac_series}
             onChange={(v) => setField("hvac_series", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -315,12 +354,14 @@ export function InspectionDetail({
             description="Exterior doors have rated protection."
             checked={data.wind_mit_doors_protected}
             onChange={(v) => setField("wind_mit_doors_protected", v)}
+            disabled={readOnly}
           />
           <SwitchField
             label="Windows Protected"
             description="Windows have rated protection."
             checked={data.wind_mit_windows_protected}
             onChange={(v) => setField("wind_mit_windows_protected", v)}
+            disabled={readOnly}
           />
         </SectionCard>
 
@@ -336,6 +377,7 @@ export function InspectionDetail({
             value={data.additional_notes}
             onChange={(v) => setField("additional_notes", v)}
             placeholder="Add any additional notes…"
+            disabled={readOnly}
           />
         </SectionCard>
       </div>

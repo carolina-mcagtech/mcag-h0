@@ -85,6 +85,8 @@ export function InspectionHeader({
                   <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                   Saving…
                 </span>
+              ) : saveStatus === "warning" ? (
+                <span className="text-amber-600">This inspection is delivered and cannot be edited.</span>
               ) : saveStatus === "error" ? (
                 <span className="text-destructive">Save failed</span>
               ) : (
