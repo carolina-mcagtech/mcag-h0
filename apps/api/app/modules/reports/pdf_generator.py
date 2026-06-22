@@ -417,6 +417,28 @@ body {
   margin-top: 12pt;
   font-weight: 600;
 }
+
+/* ── Component observations ──────────────────────────────────────────────── */
+.obs-metadata { margin-bottom: 10pt; }
+.obs-subtitle {
+  font-size: 9pt; font-weight: 700; color: var(--primary);
+  margin-bottom: 5pt; border-bottom: 1px solid var(--primary);
+  padding-bottom: 2pt;
+}
+.obs-meta-table { width: 100%; font-size: 8.5pt; }
+.obs-meta-label { font-weight: 600; color: #555; width: 35%; padding: 2pt 6pt 2pt 0; }
+.obs-meta-value { padding: 2pt 0; }
+.obs-conditions { margin-bottom: 10pt; }
+.obs-items-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.obs-items-table th {
+  background: #f1f5f9; color: #334155; font-weight: 600;
+  padding: 4pt 6pt; text-align: left; border-bottom: 1px solid #cbd5e1;
+}
+.obs-items-table td { padding: 3pt 6pt; border-bottom: 1px solid #f0f0f0; }
+.obs-col-item { width: 30%; }
+.obs-col-cond { width: 15%; text-align: center; }
+.obs-col-notes { width: 55%; }
+.obs-divider { border: none; border-top: 1px solid #e5e7eb; margin: 8pt 0; }
 </style>
 </head>
 <body>
@@ -614,6 +636,67 @@ body {
 
   <p class="disclaimer">{{ disclaimer }}</p>
 
+  {# ── SECTION METADATA (material/type selections) ──────────────────── #}
+  {% set obs_data = section_observations.get(section_key) %}
+  {% if obs_data and obs_data.metadata %}
+  <div class="obs-metadata">
+    <h4 class="obs-subtitle">Section Details</h4>
+    <table class="obs-meta-table">
+      {% for field_key, field_def in obs_data.catalog.metadata_fields.items() %}
+      {% set field_val = obs_data.metadata.get(field_key) %}
+      {% if field_val %}
+      <tr>
+        <td class="obs-meta-label">{{ field_def.label }}:</td>
+        <td class="obs-meta-value">
+          {% if field_val is iterable and field_val is not string %}
+            {{ field_val | join(", ") }}
+          {% else %}
+            {{ field_val }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+
+  {# ── COMPONENT CONDITIONS (condition items) ────────────────────────── #}
+  {% if obs_data and obs_data.observations %}
+  <div class="obs-conditions">
+    <h4 class="obs-subtitle">Component Conditions</h4>
+    <table class="obs-items-table">
+      <thead>
+        <tr>
+          <th class="obs-col-item">Component</th>
+          <th class="obs-col-cond">Condition</th>
+          <th class="obs-col-notes">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for obs in obs_data.observations %}
+        <tr>
+          <td class="obs-col-item">
+            {% if obs.room_label %}{{ obs.room_label }} — {% endif %}
+            {{ obs.item_label }}
+          </td>
+          <td class="obs-col-cond">
+            <span class="cond-badge" style="background: {{ condition_colors.get(obs.condition, '#ffffff') }}">
+              {{ obs.condition | replace("N_A", "N/A") }}
+            </span>
+          </td>
+          <td class="obs-col-notes">{{ obs.observations or "" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if obs_data and (obs_data.metadata or obs_data.observations) %}
+  <hr class="obs-divider">
+  {% endif %}
+
   <table class="findings-table">
     <thead>
       <tr>
@@ -728,6 +811,31 @@ async def generate_full_inspection_pdf(
     except Exception:
         pass  # S3 not configured; photos will not appear in PDF
 
+    from app.modules.observations.service import get_section_observations
+    from app.modules.observations.catalog import SECTION_CATALOG
+
+    _FINDINGS_TO_CATALOG = {
+        "FRONT": "FRONT", "EXTERIOR": "EXTERIOR", "INSULATION": "INSULATION_VENTILATION",
+        "PLUMBING": "PLUMBING", "STRUCTURAL": "STRUCTURAL", "ELECTRICAL": "ELECTRICAL",
+        "ROOF": "ROOF", "KITCHEN": "INTERIOR_KITCHEN_DINING", "INTERIOR": None,
+        "AIR_CONDITIONING": "AIR_CONDITIONING", "COMMENTS": None,
+        "COST_ESTIMATION": None, "COUNTY_INFO": None, "DISCLOSURE": None,
+        "BEDROOMS": "BEDROOMS", "BATHROOMS": "BATHROOMS",
+    }
+
+    section_observations: dict = {}
+    section_metadata_data: dict = {}
+    try:
+        for findings_key, catalog_key in _FINDINGS_TO_CATALOG.items():
+            if catalog_key and catalog_key in SECTION_CATALOG:
+                obs_data = await get_section_observations(
+                    inspection_id, catalog_key, session
+                )
+                section_observations[findings_key] = obs_data
+                section_metadata_data[findings_key] = obs_data.metadata
+    except Exception:
+        pass  # observations not available
+
     sections: dict[str, list] = defaultdict(list)
     for f in findings:
         key = f.section.value if hasattr(f.section, "value") else str(f.section)
@@ -833,6 +941,8 @@ async def generate_full_inspection_pdf(
         summary_rows=summary_rows,
         defective_items=defective_items,
         finding_photos=finding_photos,
+        section_observations=section_observations,
+        section_metadata_data=section_metadata_data,
         sections_with_findings=bool(ordered_sections),
         has_roof_data=has_roof_data,
         has_water_heater_data=has_water_heater_data,
