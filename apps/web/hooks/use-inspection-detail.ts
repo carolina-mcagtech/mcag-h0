@@ -32,7 +32,7 @@ function buildPutBody(d: InspectionDetailData) {
     full_report_number: d.full_report_number,
     insurance_report_number: d.insurance_report_number,
     roof_permit_number: d.roof_permit_number,
-    roof_date: d.roof_date,
+    roof_date: d.roof_date ? `${d.roof_date}-01-01` : null,
     roof_style: d.roof_style,
     roof_type: d.roof_type,
     water_heater_type: d.water_heater_type,
