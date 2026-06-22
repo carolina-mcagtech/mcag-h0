@@ -9,6 +9,7 @@ interface SectionSidebarProps {
   onSelect: (section: Section) => void
   counts: Record<Section, number>
   sectionsWithErrors: Set<Section>
+  observedSections?: Set<Section>
 }
 
 export function SectionSidebar({
@@ -16,6 +17,7 @@ export function SectionSidebar({
   onSelect,
   counts,
   sectionsWithErrors,
+  observedSections,
 }: SectionSidebarProps) {
   return (
     <nav aria-label="Inspection sections" className="flex flex-col gap-0.5 p-2">
@@ -26,6 +28,7 @@ export function SectionSidebar({
         const count = counts[section] ?? 0
         const isActive = section === active
         const hasError = sectionsWithErrors.has(section)
+        const hasObservations = observedSections?.has(section) ?? false
         return (
           <button
             key={section}
@@ -51,17 +54,22 @@ export function SectionSidebar({
                 />
               )}
             </span>
-            <span
-              className={cn(
-                "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums",
-                isActive
-                  ? "bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground"
-                  : count > 0
-                    ? "bg-secondary text-secondary-foreground"
-                    : "text-muted-foreground",
+            <span className="flex items-center gap-1.5">
+              {hasObservations && (
+                <span className="size-2 rounded-full bg-green-500 shrink-0" aria-label="Has observations" />
               )}
-            >
-              {count}
+              <span
+                className={cn(
+                  "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums",
+                  isActive
+                    ? "bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground"
+                    : count > 0
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground",
+                )}
+              >
+                {count}
+              </span>
             </span>
           </button>
         )

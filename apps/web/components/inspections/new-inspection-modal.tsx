@@ -117,7 +117,8 @@ export function NewInspectionModal({
                   id="scheduledAt"
                   type="datetime-local"
                   required
-                  className={inputClass}
+                  className={cn(inputClass, "max-w-full")}
+                  style={{ colorScheme: "light" }}
                   value={form.state.scheduledAt}
                   onChange={(e) => form.setField("scheduledAt", e.target.value)}
                 />

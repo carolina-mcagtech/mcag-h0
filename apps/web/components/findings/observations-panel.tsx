@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useObservations } from "@/hooks/use-observations"
 import { MetadataField } from "@/components/findings/metadata-field"
 import { Input } from "@/components/ui/input"
@@ -155,6 +155,7 @@ interface ObservationsPanelProps {
   catalog: SectionCatalog
   numBedrooms?: number
   numBathrooms?: number
+  onObservationsLoaded?: () => void
 }
 
 export function ObservationsPanel({
@@ -163,6 +164,7 @@ export function ObservationsPanel({
   catalog,
   numBedrooms = 0,
   numBathrooms = 0,
+  onObservationsLoaded,
 }: ObservationsPanelProps) {
   const {
     loading,
@@ -180,6 +182,17 @@ export function ObservationsPanel({
     numBedrooms,
     numBathrooms,
   })
+
+  const notifiedRef = useRef(false)
+  useEffect(() => {
+    if (loading || notifiedRef.current || !onObservationsLoaded) return
+    const hasData =
+      observations.length > 0 || Object.values(metadata).some(Boolean)
+    if (hasData) {
+      notifiedRef.current = true
+      onObservationsLoaded()
+    }
+  }, [loading, observations, metadata, onObservationsLoaded])
 
   const hasMetadata = Object.keys(catalog.metadata_fields).length > 0
   const hasItems = catalog.items.length > 0

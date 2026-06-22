@@ -44,10 +44,21 @@ export function FindingsEntry({
 
   const [activeSection, setActiveSection] = useState<Section>("ROOF")
   const [showMobilePanel, setShowMobilePanel] = useState(false)
+  const [observedSections, setObservedSections] = useState<Set<Section>>(new Set())
+
+  const isReadOnly =
+    inspection.status === "DELIVERED" || inspection.status === "PUBLISHED"
 
   const handleSelectSection = (section: Section) => {
     setActiveSection(section)
     setShowMobilePanel(true)
+  }
+
+  const handleObservationsLoaded = (section: Section) => {
+    setObservedSections((prev) => {
+      if (prev.has(section)) return prev
+      return new Set([...prev, section])
+    })
   }
 
   return (
@@ -56,6 +67,12 @@ export function FindingsEntry({
         inspection={inspection}
         globalSaveStatus={globalSaveStatus}
       />
+
+      {isReadOnly && (
+        <div className="border-b border-amber-200 bg-amber-50 px-6 py-2.5 text-sm text-amber-800">
+          This inspection has been delivered and is read-only.
+        </div>
+      )}
 
       <div className="flex min-h-0 flex-1">
         <aside
@@ -70,6 +87,7 @@ export function FindingsEntry({
             onSelect={handleSelectSection}
             counts={counts}
             sectionsWithErrors={sectionsWithErrors}
+            observedSections={observedSections}
           />
         </aside>
 
@@ -93,6 +111,8 @@ export function FindingsEntry({
             catalogData={catalogData}
             numBedrooms={numBedrooms}
             numBathrooms={numBathrooms}
+            isReadOnly={isReadOnly}
+            onObservationsLoaded={handleObservationsLoaded}
           />
         </main>
       </div>

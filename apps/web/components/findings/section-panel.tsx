@@ -29,6 +29,8 @@ interface SectionPanelProps {
   catalogData: Record<string, SectionCatalog>
   numBedrooms: number
   numBathrooms: number
+  isReadOnly?: boolean
+  onObservationsLoaded?: (section: Section) => void
 }
 
 const RULE_BADGE: Record<string, { label: string; className: string }> = {
@@ -60,6 +62,8 @@ export function SectionPanel({
   catalogData,
   numBedrooms,
   numBathrooms,
+  isReadOnly = false,
+  onObservationsLoaded,
 }: SectionPanelProps) {
   const config = SECTION_CONFIG[section]
   const rule = RULE_BADGE[config.conditionRule]
@@ -98,10 +102,12 @@ export function SectionPanel({
             </div>
             <p className="text-sm text-muted-foreground">{config.helper}</p>
           </div>
-          <Button type="button" onClick={onAdd} size="sm">
-            <Plus />
-            Add finding
-          </Button>
+          {!isReadOnly && (
+            <Button type="button" onClick={onAdd} size="sm">
+              <Plus />
+              Add finding
+            </Button>
+          )}
         </div>
       </header>
 
@@ -125,6 +131,11 @@ export function SectionPanel({
                     catalog={catalog}
                     numBedrooms={numBedrooms}
                     numBathrooms={numBathrooms}
+                    onObservationsLoaded={
+                      onObservationsLoaded
+                        ? () => onObservationsLoaded(section)
+                        : undefined
+                    }
                   />
                   {idx < catalogSections.length - 1 && (
                     <div className="my-4 border-t border-border/60" />
@@ -145,13 +156,17 @@ export function SectionPanel({
             <div className="space-y-1">
               <p className="text-sm font-medium text-foreground">No findings yet</p>
               <p className="text-sm text-muted-foreground">
-                Add the first finding for {SECTION_LABELS[section]}.
+                {isReadOnly
+                  ? `No findings recorded for ${SECTION_LABELS[section]}.`
+                  : `Add the first finding for ${SECTION_LABELS[section]}.`}
               </p>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={onAdd}>
-              <Plus />
-              Add finding
-            </Button>
+            {!isReadOnly && (
+              <Button type="button" variant="outline" size="sm" onClick={onAdd}>
+                <Plus />
+                Add finding
+              </Button>
+            )}
           </div>
         ) : (
           <ul className="space-y-3">
@@ -166,6 +181,7 @@ export function SectionPanel({
                 onRemove={() => onRemove(finding.id)}
                 onRetry={() => onRetry(finding.id)}
                 onPhotosChange={(photos) => onPhotosChange(finding.id, photos)}
+                isReadOnly={isReadOnly}
               />
             ))}
           </ul>

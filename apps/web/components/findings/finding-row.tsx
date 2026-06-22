@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ConditionControl } from "@/components/findings/condition-control"
 import {
+  CONDITION_LABELS,
   SECTION_CONFIG,
   isTempId,
   type Condition,
@@ -25,6 +26,7 @@ interface FindingRowProps {
   onRemove: () => void
   onRetry: () => void
   onPhotosChange: (photos: Photo[]) => void
+  isReadOnly?: boolean
 }
 
 function SaveStatusBadge({
@@ -75,7 +77,7 @@ function SaveStatusBadge({
   return null
 }
 
-export function FindingRow({ finding, index, errors, inspectionId, onChange, onRemove, onRetry, onPhotosChange }: FindingRowProps) {
+export function FindingRow({ finding, index, errors, inspectionId, onChange, onRemove, onRetry, onPhotosChange, isReadOnly = false }: FindingRowProps) {
   const config = SECTION_CONFIG[finding.section]
   const showCondition = config.conditionRule !== "forbidden"
   const conditionRequired = config.conditionRule === "required"
@@ -93,60 +95,81 @@ export function FindingRow({ finding, index, errors, inspectionId, onChange, onR
         <div className="flex-1 space-y-4">
           {/* Item — required everywhere */}
           <div className="space-y-1.5">
-            <label htmlFor={itemId} className="text-sm font-medium">
-              Item <span className="text-destructive">*</span>
-            </label>
-            <Input
-              id={itemId}
-              value={finding.item}
-              onChange={(e) => onChange({ item: e.target.value })}
-              placeholder="e.g. Roof covering"
-              aria-invalid={!!errors.item}
-              aria-describedby={errors.item ? `${itemId}-error` : undefined}
-            />
-            {errors.item && (
-              <p id={`${itemId}-error`} className="text-xs text-destructive">
-                {errors.item}
-              </p>
+            <p className="text-sm font-medium">
+              Item {!isReadOnly && <span className="text-destructive">*</span>}
+            </p>
+            {isReadOnly ? (
+              <p className="text-sm text-foreground">{finding.item || "—"}</p>
+            ) : (
+              <>
+                <Input
+                  id={itemId}
+                  value={finding.item}
+                  onChange={(e) => onChange({ item: e.target.value })}
+                  placeholder="e.g. Roof covering"
+                  aria-invalid={!!errors.item}
+                  aria-describedby={errors.item ? `${itemId}-error` : undefined}
+                />
+                {errors.item && (
+                  <p id={`${itemId}-error`} className="text-xs text-destructive">
+                    {errors.item}
+                  </p>
+                )}
+              </>
             )}
           </div>
 
           {/* Condition — only for sections where it is not forbidden */}
           {showCondition && (
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                Condition{" "}
-                {conditionRequired ? (
-                  <span className="text-destructive">*</span>
-                ) : (
-                  <span className="text-xs font-normal text-muted-foreground">(optional)</span>
-                )}
-              </label>
-              <div>
-                <ConditionControl
-                  value={finding.condition}
-                  onChange={(c: Condition) => onChange({ condition: c })}
-                  invalid={!!errors.condition}
-                />
-              </div>
-              {errors.condition && (
-                <p className="text-xs text-destructive">{errors.condition}</p>
+              {isReadOnly ? (
+                <>
+                  <p className="text-sm font-medium">Condition</p>
+                  <p className="text-sm text-foreground">
+                    {finding.condition ? CONDITION_LABELS[finding.condition] : "—"}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <label className="text-sm font-medium">
+                    Condition{" "}
+                    {conditionRequired ? (
+                      <span className="text-destructive">*</span>
+                    ) : (
+                      <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+                    )}
+                  </label>
+                  <div>
+                    <ConditionControl
+                      value={finding.condition}
+                      onChange={(c: Condition) => onChange({ condition: c })}
+                      invalid={!!errors.condition}
+                    />
+                  </div>
+                  {errors.condition && (
+                    <p className="text-xs text-destructive">{errors.condition}</p>
+                  )}
+                </>
               )}
             </div>
           )}
 
           {/* Observations — optional everywhere */}
           <div className="space-y-1.5">
-            <label htmlFor={obsId} className="text-sm font-medium">
-              Observations
-            </label>
-            <Textarea
-              id={obsId}
-              value={finding.observations ?? ""}
-              onChange={(e) => onChange({ observations: e.target.value })}
-              placeholder="Free-text notes…"
-              rows={2}
-            />
+            <p className="text-sm font-medium">Observations</p>
+            {isReadOnly ? (
+              <p className="text-sm text-foreground">
+                {finding.observations || "—"}
+              </p>
+            ) : (
+              <Textarea
+                id={obsId}
+                value={finding.observations ?? ""}
+                onChange={(e) => onChange({ observations: e.target.value })}
+                placeholder="Free-text notes…"
+                rows={2}
+              />
+            )}
           </div>
 
           {/* Photos — available once the finding is persisted */}
@@ -190,17 +213,19 @@ export function FindingRow({ finding, index, errors, inspectionId, onChange, onR
 
         {/* Status badge + delete button */}
         <div className="flex shrink-0 items-center gap-2 pt-0.5">
-          <SaveStatusBadge saveStatus={finding.saveStatus} onRetry={onRetry} />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onRemove}
-            aria-label={`Remove finding ${index + 1}`}
-            className="text-muted-foreground hover:text-destructive"
-          >
-            <Trash2 />
-          </Button>
+          {!isReadOnly && <SaveStatusBadge saveStatus={finding.saveStatus} onRetry={onRetry} />}
+          {!isReadOnly && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={onRemove}
+              aria-label={`Remove finding ${index + 1}`}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 />
+            </Button>
+          )}
         </div>
       </div>
     </li>
