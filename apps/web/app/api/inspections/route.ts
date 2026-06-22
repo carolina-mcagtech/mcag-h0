@@ -4,29 +4,9 @@ import { NextRequest, NextResponse } from "next/server"
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 
-function decodeJwtPayload(token: string): Record<string, unknown> {
-  const segment = token.split(".")[1]
-  if (!segment) throw new Error("Malformed token")
-  const padded = segment.replace(/-/g, "+").replace(/_/g, "/")
-  const json = Buffer.from(padded, "base64").toString("utf8")
-  return JSON.parse(json)
-}
-
 export async function POST(req: NextRequest) {
   const token = cookies().get("id_token")?.value
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
-  let claims: Record<string, unknown>
-  try {
-    claims = decodeJwtPayload(token)
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const inspectorId = claims["sub"] as string | undefined
-  if (!inspectorId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
 
   let body: {
     propertyAddress: string
@@ -46,7 +26,6 @@ export async function POST(req: NextRequest) {
   }
 
   const apiBody = {
-    inspector_id: inspectorId,
     property_address: body.propertyAddress,
     scheduled_at: body.scheduledAt,
     inspection_types: body.inspectionTypes,

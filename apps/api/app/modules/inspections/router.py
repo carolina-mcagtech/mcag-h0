@@ -15,6 +15,8 @@ from app.modules.inspections.schemas import (
     InspectionUpdate,
 )
 from app.modules.inspections.service import InspectionStatusTransitionError
+from app.modules.inspectors.models import InspectorProfile
+from app.shared.auth.dependencies import get_current_inspector
 from app.shared.db.session import get_session
 
 router = APIRouter(prefix="/inspections", tags=["inspections"])
@@ -23,8 +25,10 @@ router = APIRouter(prefix="/inspections", tags=["inspections"])
 @router.post("", response_model=InspectionResponse, status_code=201)
 async def create_inspection(
     payload: InspectionCreate,
+    inspector: InspectorProfile = Depends(get_current_inspector),
     session: AsyncSession = Depends(get_session),
 ) -> InspectionResponse:
+    payload.inspector_id = inspector.id
     try:
         inspection = await service.create_inspection(payload, session)
     except IntegrityError:

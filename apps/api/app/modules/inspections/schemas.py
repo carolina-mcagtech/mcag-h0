@@ -13,7 +13,7 @@ from app.modules.inspections.models import (
 
 
 class InspectionCreate(BaseModel):
-    inspector_id: uuid.UUID
+    inspector_id: uuid.UUID | None = None
     scheduled_at: datetime
     property_address: str
     inspection_types: list[InspectionTypeEnum] = Field(..., min_length=1)
