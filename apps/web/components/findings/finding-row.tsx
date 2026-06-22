@@ -8,18 +8,23 @@ import { Textarea } from "@/components/ui/textarea"
 import { ConditionControl } from "@/components/findings/condition-control"
 import {
   SECTION_CONFIG,
+  isTempId,
   type Condition,
   type Finding,
+  type Photo,
 } from "@/lib/findings"
 import { cn } from "@/lib/utils"
+import { PhotoUpload } from "@/components/findings/photo-upload"
 
 interface FindingRowProps {
   finding: Finding
   index: number
   errors: { item?: string; condition?: string }
+  inspectionId: string
   onChange: (patch: Omit<Partial<Finding>, "saveStatus" | "id">) => void
   onRemove: () => void
   onRetry: () => void
+  onPhotosChange: (photos: Photo[]) => void
 }
 
 function SaveStatusBadge({
@@ -70,7 +75,7 @@ function SaveStatusBadge({
   return null
 }
 
-export function FindingRow({ finding, index, errors, onChange, onRemove, onRetry }: FindingRowProps) {
+export function FindingRow({ finding, index, errors, inspectionId, onChange, onRemove, onRetry, onPhotosChange }: FindingRowProps) {
   const config = SECTION_CONFIG[finding.section]
   const showCondition = config.conditionRule !== "forbidden"
   const conditionRequired = config.conditionRule === "required"
@@ -143,6 +148,16 @@ export function FindingRow({ finding, index, errors, onChange, onRemove, onRetry
               rows={2}
             />
           </div>
+
+          {/* Photos — available once the finding is persisted */}
+          {!isTempId(finding.id) && (
+            <PhotoUpload
+              inspectionId={inspectionId}
+              findingId={finding.id}
+              photos={finding.photos}
+              onPhotosChange={onPhotosChange}
+            />
+          )}
 
           {/* Estimated cost — ONLY for COST_ESTIMATION */}
           {config.showEstimatedCost && (

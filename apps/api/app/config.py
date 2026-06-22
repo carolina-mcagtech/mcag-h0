@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # ADR-018: gate for /internal/* routes — disabled by default, never public
     internal_routes_enabled: bool = False
 
+    media_bucket: str = "mcag-h0-media"
+    aws_region: str = "us-east-1"
+
     # Legacy fields — used by app/shared/auth/cognito.py
     cognito_pool_id: str = ""
     cognito_client_id: str = ""

@@ -10,7 +10,7 @@ from sqlalchemy import (
     Numeric,
     Text,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.shared.db.base import Base, TimestampMixin
@@ -76,4 +76,7 @@ class Finding(Base, TenantScopedMixin, TimestampMixin):
     estimated_cost: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
     sort_order: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default="0"
+    )
+    photos: Mapped[list] = mapped_column(
+        JSONB, nullable=False, default=list, server_default="[]"
     )

@@ -211,6 +211,15 @@ export function useFindings(initialFindings: Finding[], inspection: InspectionMe
     [setFindings, scheduleSave],
   )
 
+  const updateFindingLocalOnly = useCallback(
+    (id: string, patch: Omit<Partial<Finding>, "saveStatus" | "id">) => {
+      setFindings((prev) =>
+        prev.map((f) => (f.id !== id ? f : { ...f, ...patch })),
+      )
+    },
+    [setFindings],
+  )
+
   const removeFinding = useCallback(
     async (id: string) => {
       const timer = timers.current.get(id)
@@ -313,6 +322,7 @@ export function useFindings(initialFindings: Finding[], inspection: InspectionMe
     globalSaveStatus,
     addFinding,
     updateFinding,
+    updateFindingLocalOnly,
     removeFinding,
     retryFinding,
     flushAll,

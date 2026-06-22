@@ -71,6 +71,52 @@ async def delete_finding(
     return True
 
 
+async def add_photo_to_finding(
+    finding_id: uuid.UUID,
+    inspection_id: uuid.UUID,
+    key: str,
+    view_url: str,
+    session: AsyncSession,
+) -> Finding | None:
+    finding = await get_finding(inspection_id, finding_id, session)
+    if finding is None:
+        return None
+    photos = list(finding.photos or [])
+    photos.append({"key": key, "view_url": view_url})
+    finding.photos = photos
+    await session.flush()
+    await session.refresh(finding)
+    return finding
+
+
+async def remove_photo_from_finding(
+    finding_id: uuid.UUID,
+    inspection_id: uuid.UUID,
+    photo_key: str,
+    session: AsyncSession,
+) -> Finding | None:
+    finding = await get_finding(inspection_id, finding_id, session)
+    if finding is None:
+        return None
+    finding.photos = [p for p in (finding.photos or []) if p.get("key") != photo_key]
+    await session.flush()
+    await session.refresh(finding)
+    return finding
+
+
+async def refresh_photo_urls(finding: Finding) -> list[dict]:
+    """Regenerate presigned GET URLs for all photos (called on fetch)."""
+    from app.modules.media.s3 import generate_view_url
+
+    refreshed = []
+    for photo in finding.photos or []:
+        refreshed.append({
+            "key": photo["key"],
+            "view_url": generate_view_url(photo["key"]),
+        })
+    return refreshed
+
+
 async def get_inspection_summary(
     inspection_id: uuid.UUID, session: AsyncSession
 ) -> dict[str, dict[str, int]]:

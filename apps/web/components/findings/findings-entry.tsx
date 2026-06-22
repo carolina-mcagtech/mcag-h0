@@ -37,6 +37,7 @@ export function FindingsEntry({
     globalSaveStatus,
     addFinding,
     updateFinding,
+    updateFindingLocalOnly,
     removeFinding,
     retryFinding,
   } = useFindings(initialFindings, inspection)
@@ -85,6 +86,7 @@ export function FindingsEntry({
             onUpdate={updateFinding}
             onRemove={removeFinding}
             onRetry={retryFinding}
+            onPhotosChange={(id, photos) => updateFindingLocalOnly(id, { photos })}
             onMobileBack={() => setShowMobilePanel(false)}
             inspectionId={inspection.id}
             catalogSections={resolveCatalogSections(activeSection)}

@@ -66,8 +66,29 @@ class FindingResponse(BaseModel):
     observations: str | None
     estimated_cost: Decimal | None
     sort_order: int
+    photos: list[dict] = []
     created_at: datetime
     updated_at: datetime
+
+
+class PhotoUploadRequest(BaseModel):
+    content_type: str
+
+
+class PhotoUploadResponse(BaseModel):
+    upload_url: str
+    view_url: str
+    key: str
+    photo_id: str
+
+
+class PhotoAddRequest(BaseModel):
+    key: str
+    view_url: str
+
+
+class PhotoDeleteRequest(BaseModel):
+    key: str
 
 
 class FindingsBySectionResponse(BaseModel):

@@ -9,6 +9,7 @@ import {
   SECTION_LABELS,
   getFindingErrors,
   type Finding,
+  type Photo,
   type Section,
 } from "@/lib/findings"
 import { type SectionCatalog } from "@/lib/observations"
@@ -21,6 +22,7 @@ interface SectionPanelProps {
   onUpdate: (id: string, patch: Omit<Partial<Finding>, "saveStatus" | "id">) => void
   onRemove: (id: string) => void
   onRetry: (id: string) => void
+  onPhotosChange: (id: string, photos: Photo[]) => void
   onMobileBack: () => void
   inspectionId: string
   catalogSections: string[]
@@ -51,6 +53,7 @@ export function SectionPanel({
   onUpdate,
   onRemove,
   onRetry,
+  onPhotosChange,
   onMobileBack,
   inspectionId,
   catalogSections,
@@ -158,9 +161,11 @@ export function SectionPanel({
                 finding={finding}
                 index={index}
                 errors={getFindingErrors(finding)}
+                inspectionId={inspectionId}
                 onChange={(patch) => onUpdate(finding.id, patch)}
                 onRemove={() => onRemove(finding.id)}
                 onRetry={() => onRetry(finding.id)}
+                onPhotosChange={(photos) => onPhotosChange(finding.id, photos)}
               />
             ))}
           </ul>

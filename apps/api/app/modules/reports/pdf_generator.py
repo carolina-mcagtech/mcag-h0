@@ -637,6 +637,18 @@ body {
         </td>
         <td class="col-obs">{{ f.observations or "" }}</td>
       </tr>
+      {% set f_photos = finding_photos.get(f.id | string, []) %}
+      {% if f_photos %}
+      <tr>
+        <td colspan="4" style="padding: 4pt 8pt 8pt 8pt; border-bottom: 1px solid #e5e7eb;">
+          {% for photo in f_photos[:3] %}
+          <img src="{{ photo.view_url }}"
+               style="max-height:80px; max-width:120px; object-fit:cover;
+                      margin-right:4pt; border-radius:2pt; display:inline-block;">
+          {% endfor %}
+        </td>
+      </tr>
+      {% endif %}
       {% endfor %}
     </tbody>
   </table>
@@ -702,6 +714,19 @@ async def generate_full_inspection_pdf(
     if font_family_raw:
         encoded = font_family_raw.replace(" ", "+")
         font_import_url = f"https://fonts.googleapis.com/css2?family={encoded}&display=swap"
+
+    # Build refreshed presigned URLs without mutating ORM objects.
+    finding_photos: dict[str, list] = {}
+    try:
+        from app.modules.media.s3 import generate_view_url
+        for f in findings:
+            if f.photos:
+                finding_photos[str(f.id)] = [
+                    {"key": p["key"], "view_url": generate_view_url(p["key"])}
+                    for p in f.photos
+                ]
+    except Exception:
+        pass  # S3 not configured; photos will not appear in PDF
 
     sections: dict[str, list] = defaultdict(list)
     for f in findings:
@@ -807,6 +832,7 @@ async def generate_full_inspection_pdf(
         defective_count=defective_count,
         summary_rows=summary_rows,
         defective_items=defective_items,
+        finding_photos=finding_photos,
         sections_with_findings=bool(ordered_sections),
         has_roof_data=has_roof_data,
         has_water_heater_data=has_water_heater_data,

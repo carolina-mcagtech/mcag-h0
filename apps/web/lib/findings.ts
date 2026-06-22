@@ -54,6 +54,11 @@ export const CONDITION_LABELS: Record<Condition, string> = {
 
 export type SaveStatus = "draft" | "saving" | "saved" | "error"
 
+export interface Photo {
+  key: string
+  view_url: string
+}
+
 export interface Finding {
   id: string
   section: Section
@@ -62,6 +67,7 @@ export interface Finding {
   observations?: string | null
   estimated_cost?: number | null
   sort_order: number
+  photos: Photo[]
   saveStatus: SaveStatus
 }
 
@@ -198,6 +204,7 @@ export interface FindingResponse {
   observations: string | null
   estimated_cost: number | null
   sort_order: number
+  photos: Photo[]
   created_at: string
   updated_at: string
 }
@@ -211,6 +218,7 @@ export function mapFindingResponse(r: FindingResponse): Finding {
     observations: r.observations,
     estimated_cost: r.estimated_cost,
     sort_order: r.sort_order,
+    photos: r.photos ?? [],
     saveStatus: "saved",
   }
 }
@@ -242,6 +250,7 @@ export const MOCK_FINDINGS: Finding[] = [
       "Multiple cracked and curling asphalt shingles on the south-facing slope. Granular loss observed.",
     estimated_cost: null,
     sort_order: 0,
+    photos: [],
     saveStatus: "saved",
   },
   {
@@ -252,6 +261,7 @@ export const MOCK_FINDINGS: Finding[] = [
     observations: "Sealant at chimney flashing is deteriorating and should be monitored.",
     estimated_cost: null,
     sort_order: 1,
+    photos: [],
     saveStatus: "saved",
   },
   {
@@ -262,6 +272,7 @@ export const MOCK_FINDINGS: Finding[] = [
     observations: "",
     estimated_cost: null,
     sort_order: 2,
+    photos: [],
     saveStatus: "saved",
   },
   {
@@ -272,6 +283,7 @@ export const MOCK_FINDINGS: Finding[] = [
     observations: "200A service, properly labeled. No double-tapped breakers observed.",
     estimated_cost: null,
     sort_order: 0,
+    photos: [],
     saveStatus: "saved",
   },
   {
@@ -282,6 +294,7 @@ export const MOCK_FINDINGS: Finding[] = [
       "Single-family residence, approx. 1998 construction. Property was occupied at time of inspection; some areas were obstructed by furniture and stored items.",
     estimated_cost: null,
     sort_order: 0,
+    photos: [],
     saveStatus: "saved",
   },
   {
@@ -292,6 +305,7 @@ export const MOCK_FINDINGS: Finding[] = [
     observations: "Estimate assumes full tear-off and re-shingle of the affected slope.",
     estimated_cost: 6800,
     sort_order: 0,
+    photos: [],
     saveStatus: "saved",
   },
 ]
@@ -305,6 +319,7 @@ export function newFinding(section: Section): Finding {
     observations: "",
     estimated_cost: null,
     sort_order: 0,
+    photos: [],
     saveStatus: "draft",
   }
 }
