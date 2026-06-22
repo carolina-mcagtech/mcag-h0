@@ -23,6 +23,15 @@ export function PhotoUpload({
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+
+  async function getToken(): Promise<string> {
+    const res = await fetch("/api/auth/token")
+    if (!res.ok) throw new Error("Unauthorized")
+    const { token } = (await res.json()) as { token: string }
+    return token
+  }
+
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -31,16 +40,16 @@ export function PhotoUpload({
 
     try {
       const contentType = file.type || "image/jpeg"
+      const token = await getToken()
+      const authHeader = { Authorization: `Bearer ${token}` }
+      const findingBase = `${apiUrl}/inspections/${inspectionId}/findings/${findingId}`
 
-      // 1. Get presigned upload URL
-      const urlRes = await fetch(
-        `/api/inspections/${inspectionId}/findings/${findingId}/photos`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content_type: contentType }),
-        },
-      )
+      // 1. Get presigned upload URL directly from backend
+      const urlRes = await fetch(`${findingBase}/photos/upload-url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeader },
+        body: JSON.stringify({ content_type: contentType }),
+      })
       if (!urlRes.ok) throw new Error("Failed to get upload URL.")
       const { upload_url, view_url, key } = (await urlRes.json()) as {
         upload_url: string
@@ -48,7 +57,7 @@ export function PhotoUpload({
         key: string
       }
 
-      // 2. PUT directly to S3 (file never touches Next.js)
+      // 2. PUT directly to S3 (file never touches any server)
       const s3Res = await fetch(upload_url, {
         method: "PUT",
         headers: { "Content-Type": contentType },
@@ -56,15 +65,12 @@ export function PhotoUpload({
       })
       if (!s3Res.ok) throw new Error("Upload to storage failed.")
 
-      // 3. Save photo record on the finding
-      const addRes = await fetch(
-        `/api/inspections/${inspectionId}/findings/${findingId}/photos/add`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key, view_url }),
-        },
-      )
+      // 3. Save photo record directly on the backend
+      const addRes = await fetch(`${findingBase}/photos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeader },
+        body: JSON.stringify({ key, view_url }),
+      })
       if (!addRes.ok) throw new Error("Failed to save photo record.")
 
       onPhotosChange([...photos, { key, view_url }])
@@ -79,11 +85,15 @@ export function PhotoUpload({
   async function handleRemove(key: string) {
     setError(null)
     try {
+      const token = await getToken()
       const res = await fetch(
-        `/api/inspections/${inspectionId}/findings/${findingId}/photos/remove`,
+        `${apiUrl}/inspections/${inspectionId}/findings/${findingId}/photos`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ key }),
         },
       )
