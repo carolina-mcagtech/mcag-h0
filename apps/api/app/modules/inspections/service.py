@@ -132,7 +132,7 @@ async def transition_status(
     return inspection
 
 
-async def delete_inspection(inspection_id: UUID, session: AsyncSession) -> bool:
+async def delete_inspection(inspection_id: uuid.UUID, session: AsyncSession) -> bool:
     result = await session.execute(
         select(Inspection).where(Inspection.id == inspection_id)
     )
