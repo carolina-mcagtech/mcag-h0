@@ -172,6 +172,10 @@ export function NewInspectionModal({
                     className={cn(inputClass, "pl-7")}
                     value={form.state.totalFee}
                     onChange={(e) => form.setField("totalFee", e.target.value)}
+                    onBlur={(e) => {
+                      const val = parseFloat(e.target.value.replace(/[^0-9.]/g, ""))
+                      if (!isNaN(val)) form.setField("totalFee", val.toFixed(2))
+                    }}
                   />
                 </div>
               </div>

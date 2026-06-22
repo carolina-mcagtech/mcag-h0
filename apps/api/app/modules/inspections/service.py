@@ -132,6 +132,18 @@ async def transition_status(
     return inspection
 
 
+async def delete_inspection(inspection_id: UUID, session: AsyncSession) -> bool:
+    result = await session.execute(
+        select(Inspection).where(Inspection.id == inspection_id)
+    )
+    inspection = result.scalars().first()
+    if inspection is None:
+        return False
+    await session.delete(inspection)
+    await session.flush()
+    return True
+
+
 async def _create_report_snapshot(
     inspection: Inspection, session: AsyncSession
 ) -> ReportSnapshot:

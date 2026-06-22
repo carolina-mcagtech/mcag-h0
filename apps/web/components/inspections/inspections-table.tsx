@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { Trash2 } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -19,8 +20,10 @@ import { InspectionTypePills } from "./inspection-type-pills"
 
 export function InspectionsTable({
   inspections,
+  onDelete,
 }: {
   inspections: Inspection[]
+  onDelete?: (id: string) => void
 }) {
   const router = useRouter()
 
@@ -37,7 +40,8 @@ export function InspectionsTable({
             <TableHead>Status</TableHead>
             <TableHead>Scheduled</TableHead>
             <TableHead>Inspection Types</TableHead>
-            <TableHead className="pr-6 text-right">Fee</TableHead>
+            <TableHead className="text-right">Fee</TableHead>
+            <TableHead className="w-12 pr-4" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -68,8 +72,20 @@ export function InspectionsTable({
               <TableCell>
                 <InspectionTypePills types={inspection.inspection_types} />
               </TableCell>
-              <TableCell className="pr-6 text-right font-medium tabular-nums">
+              <TableCell className="text-right font-medium tabular-nums">
                 {formatFee(inspection.total_fee)}
+              </TableCell>
+              <TableCell className="pr-4 text-right">
+                {onDelete && (
+                  <button
+                    type="button"
+                    aria-label={`Delete inspection at ${inspection.property_address}`}
+                    onClick={(e) => { e.stopPropagation(); onDelete(inspection.id) }}
+                    className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 [tr:hover_&]:opacity-100"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                )}
               </TableCell>
             </TableRow>
           ))}

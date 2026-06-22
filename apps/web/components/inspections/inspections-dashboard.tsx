@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -29,12 +29,20 @@ export function InspectionsDashboard({
   initialInspections: Inspection[]
 }) {
   const router = useRouter()
+  const [inspections, setInspections] = useState(initialInspections)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
   const [modalOpen, setModalOpen] = useState(false)
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
+
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 3500)
+    return () => clearTimeout(t)
+  }, [toast])
 
   const filtered = useMemo(() => {
-    return initialInspections.filter((inspection) => {
+    return inspections.filter((inspection) => {
       const matchesSearch = inspection.property_address
         .toLowerCase()
         .includes(search.trim().toLowerCase())
@@ -42,10 +50,10 @@ export function InspectionsDashboard({
         statusFilter === "ALL" || inspection.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [initialInspections, search, statusFilter])
+  }, [inspections, search, statusFilter])
 
-  const hasNoInspections = initialInspections.length === 0
-  const hasNoResults = initialInspections.length > 0 && filtered.length === 0
+  const hasNoInspections = inspections.length === 0
+  const hasNoResults = inspections.length > 0 && filtered.length === 0
 
   async function handleCreateInspection(payload: NewInspectionPayload) {
     const res = await fetch("/api/inspections", {
@@ -69,6 +77,27 @@ export function InspectionsDashboard({
     router.push(`/inspections/${inspection.id}`)
   }
 
+  const handleDeleteInspection = useCallback(async (id: string) => {
+    if (!window.confirm("Delete this inspection? This cannot be undone.")) return
+    try {
+      const tokenRes = await fetch("/api/auth/token")
+      if (tokenRes.status === 401) { router.push("/login"); return }
+      const { token } = (await tokenRes.json()) as { token: string }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+      const res = await fetch(`${apiUrl}/inspections/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.status === 401) { router.push("/login"); return }
+      if (!res.ok) throw new Error("Failed to delete inspection.")
+      setInspections((prev) => prev.filter((i) => i.id !== id))
+      setToast({ type: "success", message: "Inspection deleted." })
+    } catch {
+      setToast({ type: "error", message: "Failed to delete inspection. Please try again." })
+    }
+  }, [router])
+
   return (
     <>
       <NewInspectionModal
@@ -78,6 +107,20 @@ export function InspectionsDashboard({
       />
 
       <div className="flex flex-col gap-6">
+        {toast && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`rounded-lg border px-4 py-2.5 text-sm font-medium ${
+              toast.type === "success"
+                ? "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
+                : "border-destructive/30 bg-destructive/10 text-destructive"
+            }`}
+          >
+            {toast.message}
+          </div>
+        )}
+
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -142,8 +185,8 @@ export function InspectionsDashboard({
 
         {filtered.length > 0 && (
           <>
-            <InspectionsTable inspections={filtered} />
-            <InspectionsCards inspections={filtered} />
+            <InspectionsTable inspections={filtered} onDelete={handleDeleteInspection} />
+            <InspectionsCards inspections={filtered} onDelete={handleDeleteInspection} />
           </>
         )}
       </div>

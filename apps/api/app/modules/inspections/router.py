@@ -69,6 +69,16 @@ async def update_inspection(
     return InspectionResponse.model_validate(inspection)
 
 
+@router.delete("/{inspection_id}", status_code=204)
+async def delete_inspection(
+    inspection_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> None:
+    deleted = await service.delete_inspection(inspection_id, session)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="inspection not found")
+
+
 @router.post("/{inspection_id}/transition", response_model=InspectionResponse)
 async def transition_inspection_status(
     inspection_id: uuid.UUID,
