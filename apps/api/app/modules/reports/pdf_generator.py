@@ -723,14 +723,17 @@ body {
       {% set f_photos = finding_photos.get(f.id | string, []) %}
       {% if f_photos %}
       <tr>
-        <td colspan="4" style="padding: 4pt 8pt 8pt 8pt; border-bottom: 1px solid #e5e7eb;">
-          <table style="border-collapse:collapse; width:100%;"><tr>
-          {% for photo in f_photos[:3] %}
-            <td style="padding-right:6pt; width:134.6pt; vertical-align:top;">
-              <img src="{{ photo.view_url }}"
-                   style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;">
-            </td>
-          {% endfor %}
+        <td colspan="4" style="padding:4pt 8pt 8pt 8pt; border-bottom:1px solid #e5e7eb;">
+          <table style="border-collapse:collapse;"><tr>
+            {% if f_photos|length > 0 %}
+            <td style="padding-right:6pt;"><img src="{{ f_photos[0].view_url }}" style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;"></td>
+            {% endif %}
+            {% if f_photos|length > 1 %}
+            <td style="padding-right:6pt;"><img src="{{ f_photos[1].view_url }}" style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;"></td>
+            {% endif %}
+            {% if f_photos|length > 2 %}
+            <td><img src="{{ f_photos[2].view_url }}" style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;"></td>
+            {% endif %}
           </tr></table>
         </td>
       </tr>
