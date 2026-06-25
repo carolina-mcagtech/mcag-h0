@@ -724,11 +724,14 @@ body {
       {% if f_photos %}
       <tr>
         <td colspan="4" style="padding: 4pt 8pt 8pt 8pt; border-bottom: 1px solid #e5e7eb;">
+          <table style="border-collapse:collapse; width:100%;"><tr>
           {% for photo in f_photos[:3] %}
-          <img src="{{ photo.view_url }}"
-               style="height:194.4pt; width:134.6pt; object-fit:cover;
-                      border-radius:2pt; display:inline-block; margin-right:6pt;">
+            <td style="padding-right:6pt; width:134.6pt; vertical-align:top;">
+              <img src="{{ photo.view_url }}"
+                   style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;">
+            </td>
           {% endfor %}
+          </tr></table>
         </td>
       </tr>
       {% endif %}
