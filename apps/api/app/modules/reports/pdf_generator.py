@@ -723,12 +723,11 @@ body {
       {% set f_photos = finding_photos.get(f.id | string, []) %}
       {% if f_photos %}
       <tr>
-        <td colspan="4" style="padding: 4pt 8pt 8pt 8pt; border-bottom: 1px solid #e5e7eb;
-                               display:flex; flex-wrap:wrap; gap:6pt;">
+        <td colspan="4" style="padding: 4pt 8pt 8pt 8pt; border-bottom: 1px solid #e5e7eb;">
           {% for photo in f_photos[:3] %}
           <img src="{{ photo.view_url }}"
                style="height:194.4pt; width:134.6pt; object-fit:cover;
-                      border-radius:2pt;">
+                      border-radius:2pt; display:inline-block; margin-right:6pt;">
           {% endfor %}
         </td>
       </tr>
