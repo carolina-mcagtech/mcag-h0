@@ -718,17 +718,16 @@ body {
           </span>
           {% endif %}
         </td>
-        <td class="col-obs">
-          {{ f.observations or "" }}
-          {% set f_photos = finding_photos.get(f.id | string, []) %}
-          {% if f_photos %}
-          <br>
-          {% if f_photos|length > 0 %}<img src="{{ f_photos[0].view_url }}" style="height:130pt; width:90pt; object-fit:cover; border-radius:2pt; margin-right:4pt;">{% endif %}
-          {% if f_photos|length > 1 %}<img src="{{ f_photos[1].view_url }}" style="height:130pt; width:90pt; object-fit:cover; border-radius:2pt; margin-right:4pt;">{% endif %}
-          {% if f_photos|length > 2 %}<img src="{{ f_photos[2].view_url }}" style="height:130pt; width:90pt; object-fit:cover; border-radius:2pt;">{% endif %}
-          {% endif %}
+        <td class="col-obs">{{ f.observations or "" }}</td>
+      </tr>
+      {% set f_photos = finding_photos.get(f.id | string, []) %}
+      {% if f_photos %}
+      <tr style="border-bottom: 1px solid #e5e7eb;">
+        <td></td>
+        <td colspan="3" style="padding: 4pt 8pt 8pt 0;">{% if f_photos|length > 0 %}<img src="{{ f_photos[0].view_url }}" style="height:100pt; width:70pt; object-fit:cover; border-radius:2pt; margin-right:6pt;">{% endif %}{% if f_photos|length > 1 %}<img src="{{ f_photos[1].view_url }}" style="height:100pt; width:70pt; object-fit:cover; border-radius:2pt; margin-right:6pt;">{% endif %}{% if f_photos|length > 2 %}<img src="{{ f_photos[2].view_url }}" style="height:100pt; width:70pt; object-fit:cover; border-radius:2pt;">{% endif %}
         </td>
       </tr>
+      {% endif %}
       {% endfor %}
     </tbody>
   </table>
@@ -766,10 +765,10 @@ def _datefmt(value: object) -> str:
 _jinja_env.filters["datefmt"] = _datefmt
 
 
-async def generate_full_inspection_pdf(
+async def _build_inspection_html(
     inspection_id: uuid.UUID,
     session: AsyncSession,
-) -> bytes:
+) -> str:
     inspection = await get_inspection(inspection_id, session)
     if inspection is None:
         raise ValueError(f"inspection {inspection_id} not found")
@@ -949,5 +948,20 @@ async def generate_full_inspection_pdf(
         wind_mit_inspection=wind_mit_inspection,
     )
 
-    pdf_bytes: bytes = weasyprint.HTML(string=html).write_pdf()
-    return pdf_bytes
+    return html
+
+
+async def generate_full_inspection_pdf(
+    inspection_id: uuid.UUID,
+    session: AsyncSession,
+) -> bytes:
+    html = await _build_inspection_html(inspection_id, session)
+    return weasyprint.HTML(string=html).write_pdf()
+
+
+async def generate_full_inspection_html(
+    inspection_id: uuid.UUID,
+    session: AsyncSession,
+) -> str:
+    """Return raw HTML before WeasyPrint conversion (debug only)."""
+    return await _build_inspection_html(inspection_id, session)

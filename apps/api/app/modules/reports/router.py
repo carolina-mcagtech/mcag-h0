@@ -2,14 +2,17 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse, Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.modules.inspections.service import get_inspection
 from app.modules.reports import service
-from app.modules.reports.pdf_generator import generate_full_inspection_pdf
+from app.modules.reports.pdf_generator import (
+    generate_full_inspection_html,
+    generate_full_inspection_pdf,
+)
 from app.modules.reports.schemas import (
     ReportJobCreate,
     ReportJobResponse,
@@ -44,6 +47,20 @@ async def download_report_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.get("/html-debug", response_class=HTMLResponse)
+async def download_report_html_debug(
+    inspection_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> HTMLResponse:
+    """Debug: returns raw HTML before WeasyPrint conversion."""
+    await _ensure_inspection(inspection_id, session)
+    try:
+        html = await generate_full_inspection_html(inspection_id, session)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"HTML generation failed: {exc}")
+    return HTMLResponse(content=html)
 
 
 @router.post("", response_model=ReportJobResponse, status_code=201)
