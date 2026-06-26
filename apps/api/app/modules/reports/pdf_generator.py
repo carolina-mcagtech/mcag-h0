@@ -724,7 +724,7 @@ body {
       {% if f_photos %}
       <tr style="border-bottom: 1px solid #e5e7eb;">
         <td></td>
-        <td colspan="3" style="padding: 4pt 8pt 8pt 0;">{% if f_photos|length > 0 %}<img src="{{ f_photos[0].view_url }}" style="height:100pt; width:70pt; object-fit:cover; border-radius:2pt; margin-right:6pt;">{% endif %}{% if f_photos|length > 1 %}<img src="{{ f_photos[1].view_url }}" style="height:100pt; width:70pt; object-fit:cover; border-radius:2pt; margin-right:6pt;">{% endif %}{% if f_photos|length > 2 %}<img src="{{ f_photos[2].view_url }}" style="height:100pt; width:70pt; object-fit:cover; border-radius:2pt;">{% endif %}
+        <td colspan="3" style="padding: 4pt 8pt 8pt 0; overflow:hidden;">{% if f_photos|length > 0 %}<img src="{{ f_photos[0].view_url }}" style="float:left; height:100pt; width:70pt; object-fit:cover; border-radius:2pt; margin-right:6pt;">{% endif %}{% if f_photos|length > 1 %}<img src="{{ f_photos[1].view_url }}" style="float:left; height:100pt; width:70pt; object-fit:cover; border-radius:2pt; margin-right:6pt;">{% endif %}{% if f_photos|length > 2 %}<img src="{{ f_photos[2].view_url }}" style="float:left; height:100pt; width:70pt; object-fit:cover; border-radius:2pt;">{% endif %}<div style="clear:both;"></div>
         </td>
       </tr>
       {% endif %}
