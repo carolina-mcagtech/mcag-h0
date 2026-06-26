@@ -718,26 +718,17 @@ body {
           </span>
           {% endif %}
         </td>
-        <td class="col-obs">{{ f.observations or "" }}</td>
-      </tr>
-      {% set f_photos = finding_photos.get(f.id | string, []) %}
-      {% if f_photos %}
-      <tr>
-        <td colspan="4" style="padding:4pt 8pt 8pt 8pt; border-bottom:1px solid #e5e7eb;">
-          <table style="border-collapse:collapse;"><tr>
-            {% if f_photos|length > 0 %}
-            <td style="padding-right:6pt;"><img src="{{ f_photos[0].view_url }}" style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;"></td>
-            {% endif %}
-            {% if f_photos|length > 1 %}
-            <td style="padding-right:6pt;"><img src="{{ f_photos[1].view_url }}" style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;"></td>
-            {% endif %}
-            {% if f_photos|length > 2 %}
-            <td><img src="{{ f_photos[2].view_url }}" style="height:194.4pt; width:134.6pt; object-fit:cover; border-radius:2pt;"></td>
-            {% endif %}
-          </tr></table>
+        <td class="col-obs">
+          {{ f.observations or "" }}
+          {% set f_photos = finding_photos.get(f.id | string, []) %}
+          {% if f_photos %}
+          <br>
+          {% if f_photos|length > 0 %}<img src="{{ f_photos[0].view_url }}" style="height:130pt; width:90pt; object-fit:cover; border-radius:2pt; margin-right:4pt;">{% endif %}
+          {% if f_photos|length > 1 %}<img src="{{ f_photos[1].view_url }}" style="height:130pt; width:90pt; object-fit:cover; border-radius:2pt; margin-right:4pt;">{% endif %}
+          {% if f_photos|length > 2 %}<img src="{{ f_photos[2].view_url }}" style="height:130pt; width:90pt; object-fit:cover; border-radius:2pt;">{% endif %}
+          {% endif %}
         </td>
       </tr>
-      {% endif %}
       {% endfor %}
     </tbody>
   </table>
