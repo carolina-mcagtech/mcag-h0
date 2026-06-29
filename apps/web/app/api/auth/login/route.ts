@@ -39,6 +39,7 @@ export async function POST(request: Request) {
 
     const response = await cognito.send(command)
     const idToken = response.AuthenticationResult?.IdToken
+    const refreshToken = response.AuthenticationResult?.RefreshToken
     const expiresIn = response.AuthenticationResult?.ExpiresIn ?? 3600
 
     if (!idToken) {
@@ -52,6 +53,16 @@ export async function POST(request: Request) {
       maxAge: expiresIn,
       path: "/",
     })
+
+    if (refreshToken) {
+      cookies().set("refresh_token", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60,
+        path: "/",
+      })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
