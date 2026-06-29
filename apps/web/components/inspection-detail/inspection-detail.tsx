@@ -21,10 +21,12 @@ import {
 } from "@/lib/inspection-detail"
 import { useInspectionDetail } from "@/hooks/use-inspection-detail"
 
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 import { InspectionHeader } from "./inspection-header"
 import { FindingsSummary } from "./findings-summary"
 import { SectionCard } from "./section-card"
 import { InspectionTypesField } from "./inspection-types-field"
+import { Field, FieldLabel } from "@/components/ui/field"
 import {
   TextField,
   NumberField,
@@ -76,13 +78,16 @@ export function InspectionDetail({
           description="Appointment, services, and payment."
         >
           <div className="sm:col-span-2">
-            <TextField
-              label="Property Address"
-              value={data.property_address}
-              onChange={(v) => setField("property_address", v ?? "")}
-              placeholder="123 Main St, Miami, FL 33101"
-              disabled={readOnly}
-            />
+            <Field>
+              <FieldLabel>Property Address</FieldLabel>
+              <AddressAutocomplete
+                value={data.property_address ?? ""}
+                onChange={(v) => setField("property_address", v)}
+                placeholder="123 Main St, Miami, FL 33101"
+                disabled={readOnly}
+                className="w-full max-w-full"
+              />
+            </Field>
           </div>
           <TextField
             label="Scheduled At"

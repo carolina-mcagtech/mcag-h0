@@ -5,6 +5,7 @@ import { Select } from "@base-ui/react/select"
 import { Check, ChevronsUpDown, X } from "lucide-react"
 import { useState } from "react"
 
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 import { Button } from "@/components/ui/button"
 import { useNewInspectionForm } from "@/hooks/use-new-inspection-form"
 import {
@@ -94,17 +95,11 @@ export function NewInspectionModal({
                 <label htmlFor="propertyAddress" className={labelClass}>
                   Property Address <span className="text-destructive">*</span>
                 </label>
-                <input
-                  id="propertyAddress"
-                  type="text"
-                  required
-                  autoComplete="off"
-                  placeholder="1420 Brickell Ave, Miami, FL 33131"
-                  className={inputClass}
+                <AddressAutocomplete
                   value={form.state.propertyAddress}
-                  onChange={(e) =>
-                    form.setField("propertyAddress", e.target.value)
-                  }
+                  onChange={(v) => form.setField("propertyAddress", v)}
+                  placeholder="123 Main St, Miami, FL 33101"
+                  className={inputClass}
                 />
               </div>
 
